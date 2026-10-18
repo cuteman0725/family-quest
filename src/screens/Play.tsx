@@ -8,8 +8,11 @@ import { speak, stopSpeaking } from '../lib/speech'
 export interface PlayResult {
   total: number
   firstTry: number
+  /** 第一次就答錯的題目 id（記憶卡依這個建卡） */
   wrongIds: string[]
 }
+
+export type PlayMode = 'task' | 'boss' | 'review'
 
 type Feedback =
   | { kind: 'none' }
@@ -17,21 +20,36 @@ type Feedback =
   | { kind: 'hint' }
   | { kind: 'reveal' }
 
+/**
+ * exam：考試模式，不給回饋
+ * guided：引導重試，答錯先給提示再試一次
+ * recall：回想時間，不給提示，答錯直接看答案
+ */
+type RunnerStyle = 'exam' | 'guided' | 'recall'
+
 interface Props {
   task: Task
-  mode: 'task' | 'boss'
+  mode: PlayMode
   grade: Grade
   onExit: () => void
   onFinish: (r: PlayResult) => void
 }
 
 /**
- * 短任務：答錯 → 提示 → 再試一次（引導重試）；再錯就看答案和說明。全部做完才算完整訂正。
+ * 短任務、記憶卡複習：引導重試做完一輪 → 回想時間（第一次答錯的題目不看提示再答一次）。
  * 魔王關：作答中不給回饋，交卷後看錯題，再用引導重試訂正（交卷檢討）。
  */
 export function Play({ task, mode, grade, onExit, onFinish }: Props) {
-  const [stage, setStage] = useState<'exam' | 'review' | 'fix'>(mode === 'boss' ? 'exam' : 'fix')
-  const [examWrong, setExamWrong] = useState<Question[]>([])
+  const [stage, setStage] = useState<'exam' | 'examReview' | 'fix' | 'main' | 'recallIntro' | 'recall'>(
+    mode === 'boss' ? 'exam' : 'main',
+  )
+  const [missed, setMissed] = useState<Question[]>([])
+  const pick = (ids: string[]) => task.questions.filter((q) => ids.includes(q.id))
+  const result = (): PlayResult => ({
+    total: task.questions.length,
+    firstTry: task.questions.length - missed.length,
+    wrongIds: missed.map((q) => q.id),
+  })
 
   if (stage === 'exam') {
     return (
@@ -39,30 +57,28 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
         key="exam"
         title={task.title}
         questions={task.questions}
-        guided={false}
+        style="exam"
         grade={grade}
         onExit={onExit}
         onDone={(wrong) => {
-          setExamWrong(task.questions.filter((q) => wrong.includes(q.id)))
-          setStage('review')
+          setMissed(pick(wrong))
+          setStage('examReview')
         }}
       />
     )
   }
 
-  if (stage === 'review') {
+  if (stage === 'examReview') {
     const total = task.questions.length
-    const right = total - examWrong.length
-    const finish = () => onFinish({ total, firstTry: right, wrongIds: examWrong.map((q) => q.id) })
     return (
       <div className="screen review">
         <h1>交卷囉！</h1>
         <div className="big-score">
-          {right} / {total}
+          {total - missed.length} / {total}
         </div>
         <ul className="review-list">
           {task.questions.map((q, i) => {
-            const wrong = examWrong.includes(q)
+            const wrong = missed.includes(q)
             return (
               <li key={q.id} className={wrong ? 'wrong' : 'right'}>
                 <span className="mark">{wrong ? '✘' : '✔'}</span>
@@ -72,12 +88,12 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
             )
           })}
         </ul>
-        {examWrong.length > 0 ? (
+        {missed.length > 0 ? (
           <button className="big-btn primary" onClick={() => setStage('fix')}>
-            開始訂正 {examWrong.length} 題 ✏️
+            開始訂正 {missed.length} 題 ✏️
           </button>
         ) : (
-          <button className="big-btn primary" onClick={finish}>
+          <button className="big-btn primary" onClick={() => onFinish(result())}>
             全對！領獎勵 🎉
           </button>
         )}
@@ -85,40 +101,92 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
     )
   }
 
-  // fix：短任務本身，或魔王關的錯題訂正
-  const isBossFix = mode === 'boss'
+  if (stage === 'fix') {
+    return (
+      <Runner
+        key="fix"
+        title={`${task.title}・訂正`}
+        questions={missed}
+        style="guided"
+        grade={grade}
+        onExit={onExit}
+        onDone={() => onFinish(result())}
+      />
+    )
+  }
+
+  if (stage === 'recallIntro') {
+    return <RecallIntro count={missed.length} autoRead={grade === 1} onStart={() => setStage('recall')} />
+  }
+
+  if (stage === 'recall') {
+    return (
+      <Runner
+        key="recall"
+        title="🧠 回想時間"
+        questions={missed}
+        style="recall"
+        grade={grade}
+        onExit={onExit}
+        onDone={() => onFinish(result())}
+      />
+    )
+  }
+
+  // main：短任務或記憶卡複習的第一輪
   return (
     <Runner
-      key="fix"
-      title={isBossFix ? `${task.title}・訂正` : task.title}
-      questions={isBossFix ? examWrong : task.questions}
-      guided
+      key="main"
+      title={task.title}
+      questions={task.questions}
+      style="guided"
       grade={grade}
       onExit={onExit}
       onDone={(wrong) => {
-        if (isBossFix) {
-          const total = task.questions.length
-          onFinish({ total, firstTry: total - examWrong.length, wrongIds: examWrong.map((q) => q.id) })
-        } else {
-          onFinish({ total: task.questions.length, firstTry: task.questions.length - wrong.length, wrongIds: wrong })
-        }
+        const m = pick(wrong)
+        setMissed(m)
+        if (m.length > 0) setStage('recallIntro')
+        else
+          onFinish({ total: task.questions.length, firstTry: task.questions.length, wrongIds: [] })
       }}
     />
+  )
+}
+
+function RecallIntro({ count, autoRead, onStart }: { count: number; autoRead: boolean; onStart: () => void }) {
+  useEffect(() => {
+    if (autoRead) speak(`回想時間！剛剛有 ${count} 題第一次答錯，這次沒有提示，自己想想看。`)
+    return () => stopSpeaking()
+  }, [count, autoRead])
+
+  return (
+    <div className="screen recall-intro">
+      <div className="recall-icon">🧠</div>
+      <h1>回想時間</h1>
+      <p>
+        剛剛有 <strong>{count}</strong> 題第一次答錯。
+        <br />
+        這次沒有提示，自己想想看！
+      </p>
+      <p className="recall-note">答錯的題目會變成記憶卡，過幾天再出現，幫你記得更牢。</p>
+      <button className="big-btn primary" onClick={onStart}>
+        開始回想
+      </button>
+    </div>
   )
 }
 
 interface RunnerProps {
   title: string
   questions: Question[]
-  /** true：引導重試；false：考試模式，不給回饋 */
-  guided: boolean
+  style: RunnerStyle
   grade: Grade
   onExit: () => void
   /** 回傳第一次就答錯的題目 id */
   onDone: (wrongIds: string[]) => void
 }
 
-function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps) {
+function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps) {
   const [index, setIndex] = useState(0)
   const [tries, setTries] = useState(1)
   const [feedback, setFeedback] = useState<Feedback>({ kind: 'none' })
@@ -146,7 +214,7 @@ function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps
     const wrongNow = firstMiss ? [...wrong, q.id] : wrong
     if (firstMiss) setWrong(wrongNow)
 
-    if (!guided) {
+    if (style === 'exam') {
       sfx.tap()
       next(wrongNow)
       return
@@ -158,7 +226,7 @@ function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps
       return
     }
     sfx.wrong()
-    if (tries === 1) {
+    if (style === 'guided' && tries === 1) {
       setFeedback({ kind: 'hint' })
       if (autoRead) speak('再想想看。' + q.hint)
     } else {
@@ -200,7 +268,9 @@ function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps
         <GameView key={`${q.id}-${tries}`} q={q} onAnswer={onAnswer} locked={feedback.kind !== 'none'} />
       </section>
 
-      {feedback.kind === 'correct' && <div className="toast good">✨ 答對了！</div>}
+      {feedback.kind === 'correct' && (
+        <div className="toast good">{style === 'recall' ? '🧠 想起來了！' : '✨ 答對了！'}</div>
+      )}
 
       {feedback.kind === 'hint' && (
         <div className="sheet">

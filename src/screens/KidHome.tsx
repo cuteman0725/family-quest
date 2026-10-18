@@ -1,24 +1,28 @@
 import { unitsForGrade } from '../data/units'
 import { costText, TASK_REWARD } from '../data/village'
 import { bossUnlocked, recommend, taskStatuses } from '../lib/recommend'
+import { REVIEW_MAX } from '../lib/review'
 import { sfx } from '../lib/sfx'
 import { speak } from '../lib/speech'
-import { useSave } from '../lib/store'
+import { dueCardIds, useSave } from '../lib/store'
 
 interface Props {
   profileId: string
   onPlay: (unitId: string, taskId: string, mode: 'task' | 'boss') => void
+  onReview: (questionIds: string[]) => void
   onVillage: () => void
   onBack: () => void
 }
 
-export function KidHome({ profileId, onPlay, onVillage, onBack }: Props) {
+export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Props) {
   const save = useSave()
   const profile = save.profiles.find((p) => p.id === profileId)!
   const attempts = save.attempts[profileId] ?? []
   const units = unitsForGrade(profile.grade)
   const picks = recommend(taskStatuses(units, attempts))
   const isYoung = profile.grade === 1
+  const due = dueCardIds(profileId, save)
+  const reviewIds = due.slice(0, REVIEW_MAX)
 
   return (
     <div className="screen kid-home">
@@ -42,6 +46,33 @@ export function KidHome({ profileId, onPlay, onVillage, onBack }: Props) {
           </button>
         )}
       </h2>
+
+      {due.length > 0 && (
+        <div className="review-card">
+          <button
+            className="review-main"
+            onClick={() => {
+              sfx.tap()
+              if (isYoung) speak(`記憶卡複習。有 ${due.length} 張卡回來了，看看還記不記得！`)
+            }}
+          >
+            <span className="review-stack" aria-hidden>
+              🃏
+            </span>
+            <span className="review-text">
+              <strong>記憶卡複習</strong>
+              <span>
+                有 {due.length} 張卡回來了，看看還記不記得！
+                {due.length > REVIEW_MAX && `（這次先複習 ${REVIEW_MAX} 張）`}
+              </span>
+              <span className="task-meta">完成得 {costText(TASK_REWARD)}</span>
+            </span>
+          </button>
+          <button className="big-btn primary" onClick={() => onReview(reviewIds)}>
+            開始複習
+          </button>
+        </div>
+      )}
 
       <div className="task-cards">
         {picks.map(({ unit, task, doneCount, lastRate }) => (

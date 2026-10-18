@@ -5,7 +5,7 @@ import { speak } from '../lib/speech'
 
 interface Props {
   title: string
-  mode: 'task' | 'boss'
+  mode: 'task' | 'boss' | 'review'
   reward: Cost
   autoRead: boolean
   onVillage: () => void
@@ -27,7 +27,7 @@ export function Result({ title, mode, reward, autoRead, onVillage, onHome }: Pro
           </span>
         ))}
       </div>
-      <h1>{mode === 'boss' ? '打倒魔王了！' : '任務完成！'}</h1>
+      <h1>{mode === 'boss' ? '打倒魔王了！' : mode === 'review' ? '複習完成！' : '任務完成！'}</h1>
       <p className="result-title">{title}</p>
       <div className="reward">
         <span>獲得</span>

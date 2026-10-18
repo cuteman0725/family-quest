@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { units, unitsForGrade } from '../data/units'
 import { taskStatuses } from '../lib/recommend'
-import { renameProfile, resetAll, useSave } from '../lib/store'
+import { CARD_INTERVALS, cardsOf, dueCardIds, renameProfile, resetAll, useSave } from '../lib/store'
 
 /** 家長頁：看每個孩子的個人進度（首次正確率、常錯的題目），改名字 */
 export function Parent({ onBack }: { onBack: () => void }) {
@@ -29,6 +29,10 @@ export function Parent({ onBack }: { onBack: () => void }) {
         attempts.forEach((a) => a.wrongIds.forEach((id) => missCount.set(id, (missCount.get(id) ?? 0) + 1)))
         const topMiss = [...missCount].sort((a, b) => b[1] - a[1]).slice(0, 5)
         const bosses = attempts.filter((a) => a.mode === 'boss')
+        const cards = Object.values(cardsOf(p.id, save))
+        const learning = cards.filter((c) => c.box < CARD_INTERVALS.length).length
+        const learned = cards.length - learning
+        const dueNow = dueCardIds(p.id, save).length
 
         return (
           <section key={p.id} className="parent-card">
@@ -91,6 +95,9 @@ export function Parent({ onBack }: { onBack: () => void }) {
                 ))}
               </tbody>
             </table>
+            <p className="card-stats">
+              🃏 記憶卡：複習中 <strong>{learning}</strong> 張（今天到期 {dueNow} 張）・已記住 <strong>{learned}</strong> 張
+            </p>
             {topMiss.length > 0 && (
               <>
                 <h3>常錯的題目</h3>
