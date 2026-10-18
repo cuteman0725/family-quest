@@ -8,6 +8,7 @@
 npm install
 npm run dev      # http://localhost:5173，同一個 Wi-Fi 的平板可用 http://<電腦IP>:5173 試玩
 npm run build    # 輸出到 dist/
+npm test         # 記憶卡排程、題庫檢查、舊存檔相容；CI 沒過就不部署
 ```
 
 在區網用 `http://` 試玩時，平板可以玩，但**不能離線、也不能正式安裝**；要安裝到主畫面並離線使用，必須放到 HTTPS 網址。
@@ -27,3 +28,6 @@ npm run build    # 輸出到 dist/
 
 1. 仿照 `g4u1.ts` 建一個新檔，題目分成 4～6 個短任務，`boss` 放整份單元卷。
 2. 加進 `src/data/units.ts` 的 `units` 陣列。
+3. 跑 `npm test`：`src/data/questionBank.test.ts` 會檢查每一題的結構，並重算天秤、選數字、一樣多嗎的答案。
+
+改了 `SaveData` 的形狀時，在 `src/lib/save-compat.test.ts` 加一份改版前的存檔快照，確保舊平板上的進度還讀得進來。
