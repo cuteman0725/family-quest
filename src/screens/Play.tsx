@@ -123,6 +123,7 @@ function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps
   const [tries, setTries] = useState(1)
   const [feedback, setFeedback] = useState<Feedback>({ kind: 'none' })
   const [wrong, setWrong] = useState<string[]>([])
+  const [askExit, setAskExit] = useState(false)
   const q = questions[index]
   const autoRead = grade === 1
 
@@ -174,13 +175,7 @@ function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps
   return (
     <div className="screen play">
       <header className="play-top">
-        <button
-          className="icon-btn"
-          aria-label="離開"
-          onClick={() => {
-            if (window.confirm('要先離開嗎？這次的進度不會保存喔。')) onExit()
-          }}
-        >
+        <button className="icon-btn" aria-label="離開" onClick={() => setAskExit(true)}>
           ✕
         </button>
         <div className="play-title">{title}</div>
@@ -225,6 +220,21 @@ function Runner({ title, questions, guided, grade, onExit, onDone }: RunnerProps
           <button className="big-btn primary" onClick={() => next(wrong)}>
             知道了 👍
           </button>
+        </div>
+      )}
+
+      {askExit && (
+        <div className="sheet">
+          <p className="sheet-title">要先離開嗎？</p>
+          <p>這次的進度不會保存喔。</p>
+          <div className="row-buttons">
+            <button className="big-btn primary" onClick={() => setAskExit(false)}>
+              繼續玩
+            </button>
+            <button className="big-btn" onClick={onExit}>
+              離開
+            </button>
+          </div>
         </div>
       )}
     </div>

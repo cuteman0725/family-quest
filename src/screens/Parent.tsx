@@ -8,6 +8,7 @@ export function Parent({ onBack }: { onBack: () => void }) {
   const save = useSave()
   const [editing, setEditing] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
+  const [confirmReset, setConfirmReset] = useState(false)
 
   const allQuestions = new Map(units.flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions).map((q) => [q.id, q]))
 
@@ -106,14 +107,29 @@ export function Parent({ onBack }: { onBack: () => void }) {
         )
       })}
 
-      <button
-        className="link-btn danger"
-        onClick={() => {
-          if (window.confirm('確定要清除這台平板上所有的進度和村莊嗎？')) resetAll()
-        }}
-      >
-        清除所有資料
-      </button>
+      {confirmReset ? (
+        <div className="parent-card">
+          <p>確定要清除這台平板上所有的進度和村莊嗎？清除後無法復原。</p>
+          <div className="row-buttons">
+            <button className="big-btn" onClick={() => setConfirmReset(false)}>
+              取消
+            </button>
+            <button
+              className="big-btn danger"
+              onClick={() => {
+                resetAll()
+                setConfirmReset(false)
+              }}
+            >
+              確定清除
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="link-btn danger" onClick={() => setConfirmReset(true)}>
+          清除所有資料
+        </button>
+      )}
     </div>
   )
 }
