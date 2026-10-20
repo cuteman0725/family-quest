@@ -3,6 +3,7 @@ import type { MatchQ } from '../data/types'
 import { sfx } from '../lib/sfx'
 import type { GameProps } from './types'
 import { Rich } from './Rich'
+import { ZHUYIN_ONLY } from '../lib/zhuyin'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -43,7 +44,7 @@ export function Match({ q, onAnswer, locked }: GameProps<MatchQ>) {
         {q.pairs.map(([l], i) => (
           <button
             key={l}
-            className={`match-item ${sel === i ? 'selected' : ''} ${done.includes(i) ? 'matched' : ''}`}
+            className={`match-item ${ZHUYIN_ONLY.test(l) ? 'zhuyin' : ''} ${sel === i ? 'selected' : ''} ${done.includes(i) ? 'matched' : ''}`}
             disabled={locked || done.includes(i)}
             onClick={() => {
               sfx.tap()
@@ -60,7 +61,7 @@ export function Match({ q, onAnswer, locked }: GameProps<MatchQ>) {
           return (
             <button
               key={r}
-              className={`match-item text ${matched ? 'matched' : ''} ${shake === r ? 'shake' : ''}`}
+              className={`match-item text ${ZHUYIN_ONLY.test(r) ? 'zhuyin' : ''} ${matched ? 'matched' : ''} ${shake === r ? 'shake' : ''}`}
               disabled={locked || matched}
               onClick={() => pickRight(r)}
             >

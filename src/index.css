@@ -2261,3 +2261,102 @@ p {
   text-align: center;
   font-weight: 800;
 }
+
+/* ---------- 分類籃子 ---------- */
+
+.bins-item.selected {
+  border-color: var(--primary);
+  background: #fff1e6;
+  transform: translateY(-2px);
+}
+
+.bins {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+}
+
+.bin {
+  min-height: 130px;
+  padding: 10px;
+  border: 3px dashed var(--muted);
+  border-radius: 18px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  color: var(--ink);
+}
+
+.bin-name {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.bin-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.bin-chip {
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #e8f2fc;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* ---------- 科目分頁 ---------- */
+
+.subject-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 4px 0 12px;
+}
+
+.subject-tab {
+  flex: 1;
+  padding: 10px;
+  border: 3px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.subject-tab.active {
+  border-color: var(--primary);
+  color: var(--ink);
+  background: #fff1e6;
+}
+
+/* 注音的大字（國語題的 picture 區） */
+.q-picture.zhuyin {
+  white-space: pre-line;
+  font-size: clamp(30px, 5.5vw, 48px);
+  line-height: 1.4;
+  letter-spacing: 3px;
+}
+
+.big-btn.zhuyin-opt {
+  font-size: 34px;
+  min-width: 110px;
+  letter-spacing: 2px;
+}
+
+.match-item {
+  word-break: keep-all;
+}
+
+.match-item.zhuyin {
+  font-size: 32px;
+  letter-spacing: 2px;
+}

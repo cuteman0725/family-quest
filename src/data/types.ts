@@ -2,6 +2,8 @@
 
 export type Grade = 1 | 4
 
+export type Subject = '數學' | '國語'
+
 interface Base {
   id: string
   /** 題目文字，也是朗讀的內容 */
@@ -290,6 +292,13 @@ export type ClockQ = Base & { type: 'clock' } & (
     | { ask: 'pick'; options: ClockTime[]; answer: number }
   )
 
+/** 分類：把每個項目放進對的籃子（例如部首、詞性）；放錯會抖一下，自己改到放完 */
+export interface BinsQ extends Base {
+  type: 'bins'
+  bins: string[]
+  items: { label: string; bin: number }[]
+}
+
 /** 畫長條圖：照統計表，點格子把每一條長條畫到對的高度 */
 export interface BarBuildQ extends Base {
   type: 'barBuild'
@@ -327,6 +336,7 @@ export type Question =
   | FracLineQ
   | ClockQ
   | BarBuildQ
+  | BinsQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {
@@ -344,9 +354,11 @@ export interface Task {
 export interface Unit {
   id: string
   grade: Grade
-  /** 課本的第幾單元，用來排順序和選「目前單元」 */
+  /** 課本的第幾單元（國語是第幾份單課卷），用來排順序和選「目前單元」 */
   number: number
-  subject: '數學'
+  subject: Subject
+  /** 畫面上的名稱，例如「第 1 課」「首冊 1～2 課」；沒有就寫「單元 N」 */
+  label?: string
   title: string
   source: string
   tasks: Task[]

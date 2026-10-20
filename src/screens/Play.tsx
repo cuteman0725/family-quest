@@ -5,6 +5,7 @@ import { answerText } from '../lib/answer'
 import { sfx } from '../lib/sfx'
 import { speak, stopSpeaking } from '../lib/speech'
 import { Rich } from '../games/Rich'
+import { isZhuyinLine } from '../lib/zhuyin'
 import { Chart } from '../games/Chart'
 
 export interface PlayResult {
@@ -265,7 +266,7 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
         {q.context && <pre className="context"><Rich text={q.context} /></pre>}
         {q.chart && <Chart spec={q.chart} />}
         {q.picture && (
-          <div className={`q-picture ${q.picture.includes('\n') ? 'multi' : ''}`} aria-hidden>
+          <div className={`q-picture ${q.picture.includes('\n') ? 'multi' : ''} ${isZhuyinLine(q.picture) ? 'zhuyin' : ''}`} aria-hidden>
             {q.picture}
           </div>
         )}

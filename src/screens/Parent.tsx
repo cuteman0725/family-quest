@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { activityFor, PARENT_PRAISE } from '../data/coaching'
-import { DEFAULT_CURRENT_UNIT, unitsForGrade } from '../data/units'
+import type { Subject } from '../data/types'
+import { defaultCurrentUnit, SUBJECTS, unitLabel, unitsFor, unitsForGrade } from '../data/units'
 import { questionStates, skillMap } from '../lib/mastery'
 import { currentUnitOf, taskStatuses } from '../lib/recommend'
 import { findQuestion } from '../lib/review'
-import { CARD_INTERVALS, cardsOf, dueCardIds, renameProfile, resetAll, setCurrentUnit, useSave } from '../lib/store'
+import { CARD_INTERVALS, cardsOf, currentUnitIdOf, dueCardIds, renameProfile, resetAll, setCurrentUnit, useSave } from '../lib/store'
 import { SkillMap } from './SkillMap'
 import { Rich } from '../games/Rich'
 
@@ -18,15 +19,17 @@ export function Parent({ onBack }: { onBack: () => void }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const [confirmReset, setConfirmReset] = useState(false)
+  const [subject, setSubject] = useState<Subject>('數學')
   // 每天換一句，打開頁面時決定，重繪時不跟著變
   const [praiseIndex] = useState(() => new Date().getDate() % PARENT_PRAISE.length)
 
   const p = save.profiles.find((x) => x.id === pid) ?? save.profiles[0]
   const attempts = save.attempts[p.id] ?? []
-  const units = unitsForGrade(p.grade)
-  const current = currentUnitOf(units, p.currentUnit, DEFAULT_CURRENT_UNIT[p.grade])
+  // 記憶卡和「記得住」看全部科目；技能地圖、單元選擇、任務紀錄看選到的科目
+  const units = unitsFor(p.grade, subject)
+  const current = currentUnitOf(units, currentUnitIdOf(p, subject), defaultCurrentUnit(p.grade, subject))
   const cards = cardsOf(p.id, save)
-  const states = questionStates(units, attempts, cards)
+  const states = questionStates(unitsForGrade(p.grade), attempts, cards)
   const strong = [...states.values()].filter((s) => s === 'strong').length
   const cardList = Object.values(cards)
   const learning = cardList.filter((c) => c.box < CARD_INTERVALS.length).length
@@ -45,7 +48,7 @@ export function Parent({ onBack }: { onBack: () => void }) {
 
   const praise = PARENT_PRAISE[praiseIndex]
   const statuses = taskStatuses(units, attempts)
-  const bosses = attempts.filter((a) => a.mode === 'boss')
+  const bosses = attempts.filter((a) => a.mode === 'boss' && units.some((u) => u.id === a.unitId))
 
   return (
     <div className="screen parent">
@@ -104,6 +107,19 @@ export function Parent({ onBack }: { onBack: () => void }) {
             </>
           )}
         </h2>
+        <div className="subject-tabs" role="tablist">
+          {SUBJECTS.map((s) => (
+            <button
+              key={s.id}
+              role="tab"
+              aria-selected={s.id === subject}
+              className={`subject-tab ${s.id === subject ? 'active' : ''}`}
+              onClick={() => setSubject(s.id)}
+            >
+              {s.icon} {s.id}
+            </button>
+          ))}
+        </div>
         <div className="unit-picker">
           <span>學校目前上到：</span>
           {units.map((u) => (
@@ -111,9 +127,9 @@ export function Parent({ onBack }: { onBack: () => void }) {
               key={u.id}
               className={`small-btn ${u.id === current?.id ? 'active' : ''}`}
               aria-pressed={u.id === current?.id}
-              onClick={() => setCurrentUnit(p.id, u.id)}
+              onClick={() => setCurrentUnit(p.id, u.id, subject)}
             >
-              單元{u.number} {u.title}
+              {unitLabel(u)} {u.title}
             </button>
           ))}
         </div>

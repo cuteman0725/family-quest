@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { Grade } from '../data/types'
+import type { Grade, Subject } from '../data/types'
 import { buildingKinds, type Cost } from '../data/village'
 
 // 所有資料都存在這台平板的 localStorage（第一版不做跨裝置同步）
@@ -9,9 +9,15 @@ export interface Profile {
   name: string
   grade: Grade
   avatar: string
-  /** 學校目前上到的單元（家長頁設定）；任務推薦先排這個單元。沒設定就用最新的單元 */
+  /** 數學：學校目前上到的單元（家長頁設定）；任務推薦先排這個單元。舊存檔只有這個欄位 */
   currentUnit?: string
+  /** 每一科學校目前上到的單元（國語加進來之後才有） */
+  currentUnits?: Partial<Record<Subject, string>>
 }
+
+/** 這個孩子某一科「學校目前上到」的單元 id（沒設定回傳 undefined） */
+export const currentUnitIdOf = (p: Profile, subject: Subject) =>
+  p.currentUnits?.[subject] ?? (subject === '數學' ? p.currentUnit : undefined)
 
 export interface Attempt {
   unitId: string
@@ -180,10 +186,14 @@ export function renameProfile(profileId: string, name: string) {
   })
 }
 
-export function setCurrentUnit(profileId: string, unitId: string) {
+export function setCurrentUnit(profileId: string, unitId: string, subject: Subject = '數學') {
   commit({
     ...state,
-    profiles: state.profiles.map((p) => (p.id === profileId ? { ...p, currentUnit: unitId } : p)),
+    profiles: state.profiles.map((p) =>
+      p.id === profileId
+        ? { ...p, currentUnits: { ...p.currentUnits, [subject]: unitId }, ...(subject === '數學' ? { currentUnit: unitId } : {}) }
+        : p,
+    ),
   })
 }
 

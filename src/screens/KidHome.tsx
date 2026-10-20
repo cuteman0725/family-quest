@@ -1,11 +1,13 @@
-import { DEFAULT_CURRENT_UNIT, unitsForGrade } from '../data/units'
+import { useState } from 'react'
+import type { Subject } from '../data/types'
+import { defaultCurrentUnit, SUBJECTS, unitLabel, unitsFor, unitsForGrade } from '../data/units'
 import { costText, TASK_REWARD } from '../data/village'
 import { questionStates, skillMap } from '../lib/mastery'
 import { bossUnlocked, currentUnitOf, recommend, taskStatuses } from '../lib/recommend'
 import { REVIEW_MAX } from '../lib/review'
 import { sfx } from '../lib/sfx'
 import { speak } from '../lib/speech'
-import { cardsOf, dueCardIds, useSave } from '../lib/store'
+import { cardsOf, currentUnitIdOf, dueCardIds, useSave } from '../lib/store'
 import { SkillMap } from './SkillMap'
 
 interface Props {
@@ -16,12 +18,23 @@ interface Props {
   onBack: () => void
 }
 
+/** 上次看的科目記在這台平板（只是方便，讀不到就從數學開始） */
+const SUBJECT_KEY = (pid: string) => `family-quest-subject-${pid}`
+function loadSubject(pid: string): Subject {
+  try {
+    return localStorage.getItem(SUBJECT_KEY(pid)) === '國語' ? '國語' : '數學'
+  } catch {
+    return '數學'
+  }
+}
+
 export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Props) {
   const save = useSave()
   const profile = save.profiles.find((p) => p.id === profileId)!
   const attempts = save.attempts[profileId] ?? []
-  const units = unitsForGrade(profile.grade)
-  const current = currentUnitOf(units, profile.currentUnit, DEFAULT_CURRENT_UNIT[profile.grade])
+  const [subject, setSubject] = useState<Subject>(() => loadSubject(profileId))
+  const units = unitsFor(profile.grade, subject)
+  const current = currentUnitOf(units, currentUnitIdOf(profile, subject), defaultCurrentUnit(profile.grade, subject))
   const picks = recommend(taskStatuses(units, attempts), 3, current?.id)
   // 魔王關：目前單元一定顯示；其他單元解鎖了才顯示
   const bossUnits = units.filter((u) => u.id === current?.id || bossUnlocked(u, attempts))
@@ -29,7 +42,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
   const isYoung = profile.grade === 1
   const due = dueCardIds(profileId, save)
   const reviewIds = due.slice(0, REVIEW_MAX)
-  const states = questionStates(units, attempts, cardsOf(profileId, save))
+  const states = questionStates(unitsForGrade(profile.grade), attempts, cardsOf(profileId, save))
 
   return (
     <div className="screen kid-home">
@@ -44,6 +57,29 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
           🪵{save.wood} 🪨{save.stone} ⭐{save.star} ・ 去村莊 🏡
         </button>
       </header>
+
+      <div className="subject-tabs" role="tablist">
+        {SUBJECTS.map((s) => (
+          <button
+            key={s.id}
+            role="tab"
+            aria-selected={s.id === subject}
+            className={`subject-tab ${s.id === subject ? 'active' : ''}`}
+            onClick={() => {
+              sfx.tap()
+              setSubject(s.id)
+              if (isYoung) speak(s.id)
+              try {
+                localStorage.setItem(SUBJECT_KEY(profileId), s.id)
+              } catch {
+                // 存不了就算了，下次從數學開始
+              }
+            }}
+          >
+            {s.icon} {s.id}
+          </button>
+        ))}
+      </div>
 
       <h2 className="section-title">
         今天想做哪一個任務？
@@ -92,7 +128,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
               }}
             >
               <span className="task-icon">{task.icon}</span>
-              {unit.id !== current?.id && <span className="task-review-tag">複習：單元{unit.number}</span>}
+              {unit.id !== current?.id && <span className="task-review-tag">複習：{unitLabel(unit)}</span>}
               <span className="task-title">{task.title}</span>
               <span className="task-blurb">{task.blurb}</span>
               <span className="task-meta">
@@ -126,7 +162,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
 
       {current && (
         <SkillMap
-          title={`我的技能地圖：單元${current.number} ${current.title}`}
+          title={`我的技能地圖：${unitLabel(current)} ${current.title}`}
           nodes={skillMap(current, states)}
           autoRead={isYoung}
         />
@@ -135,7 +171,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
         <details className="other-maps">
           <summary>其他單元的技能地圖</summary>
           {otherUnits.map((u) => (
-            <SkillMap key={u.id} title={`單元${u.number} ${u.title}`} nodes={skillMap(u, states)} autoRead={isYoung} />
+            <SkillMap key={u.id} title={`${unitLabel(u)} ${u.title}`} nodes={skillMap(u, states)} autoRead={isYoung} />
           ))}
         </details>
       )}

@@ -59,6 +59,8 @@ export function activityFor(q: Question): string {
       return '拿一條繩子當數線，標 0、1、2，請她把繩子摺成一樣長的幾段，找出指定的分數在哪裡。'
     case 'clock':
       return '看家裡的時鐘，請她說現在是幾點；約好「7 點半洗澡」，時間到了請她自己看時鐘提醒你。'
+    case 'bins':
+      return '寫幾張字卡（例如「媽、姊、河、海」），請她依部首分成兩堆，再說說看部首和字的意思有什麼關係。'
     case 'barBuild':
       return '一起記錄一週每天喝幾杯水，用方格紙畫成長條圖，再問她：哪一天最多？比最少的多幾杯？'
     case 'triangle':

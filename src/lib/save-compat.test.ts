@@ -75,3 +75,15 @@ describe('舊存檔相容', () => {
     }
   })
 })
+
+describe('每一科的「學校目前上到」', () => {
+  it('舊存檔只有數學的 currentUnit：數學照舊，國語是還沒設定', async () => {
+    const { currentUnitIdOf } = await import('./store')
+    const old = { id: 'p4', name: '瑄', grade: 4 as const, avatar: '🦊', currentUnit: 'g4u5' }
+    expect(currentUnitIdOf(old, '數學')).toBe('g4u5')
+    expect(currentUnitIdOf(old, '國語')).toBeUndefined()
+    const both = { ...old, currentUnits: { 國語: 'g4c1' } }
+    expect(currentUnitIdOf(both, '數學')).toBe('g4u5')
+    expect(currentUnitIdOf(both, '國語')).toBe('g4c1')
+  })
+})

@@ -12,6 +12,7 @@ import { Sort } from './Sort'
 import { Equation } from './Equation'
 import { Clock } from './Clock'
 import { BarBuild } from './Chart'
+import { Bins } from './Bins'
 import { FracLine, FractionInput } from './Fraction'
 import { Choice, Compare, Same, TrueFalse } from './Buttons'
 import { Digits, NumberInput } from './Keypad'
@@ -80,5 +81,7 @@ export function GameView({ q, ...rest }: GameProps<Question>) {
       return <Clock q={q} {...rest} />
     case 'barBuild':
       return <BarBuild q={q} {...rest} />
+    case 'bins':
+      return <Bins q={q} {...rest} />
   }
 }

@@ -146,6 +146,8 @@ export function answerText(q: Question): string {
       return clockText(q.ask === 'read' ? q.time : q.options[q.answer])
     case 'barBuild':
       return q.categories.map((c, i) => `${c} ${q.values[i]}`).join('、')
+    case 'bins':
+      return q.bins.map((b, bi) => `${b}：${q.items.filter((it) => it.bin === bi).map((it) => it.label).join('、')}`).join('\n')
   }
 }
 

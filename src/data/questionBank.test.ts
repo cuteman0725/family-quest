@@ -111,6 +111,10 @@ describe.each(entries)('$where', ({ q, grade }) => {
     it('一年級題目會被朗讀，不放念不出來的符號', () => {
       expect(q.prompt).not.toMatch(/[□?<>＜＞]/)
     })
+    it('一年級的題目和提示會被朗讀，不放注音符號（注音放在大圖和選項）', () => {
+      expect(q.prompt).not.toMatch(/[ㄅ-ㄯ]/)
+      expect(q.hint).not.toMatch(/[ㄅ-ㄯ]/)
+    })
   }
 
   switch (q.type) {
@@ -400,6 +404,19 @@ describe.each(entries)('$where', ({ q, grade }) => {
       })
       break
     }
+
+    case 'bins':
+      it('分類：至少兩個籃子、每個籃子都有東西，項目不重複，說明寫出每個籃子', () => {
+        expect(q.bins.length).toBeGreaterThanOrEqual(2)
+        expect(new Set(q.items.map((it) => it.label)).size).toBe(q.items.length)
+        expect(q.items.every((it) => it.bin >= 0 && it.bin < q.bins.length)).toBe(true)
+        q.bins.forEach((b, bi) => {
+          const inBin = q.items.filter((it) => it.bin === bi)
+          expect(inBin.length, b).toBeGreaterThan(0)
+          for (const it of inBin) expect(q.explain).toContain(it.label)
+        })
+      })
+      break
 
     case 'barBuild':
       it('畫長條圖：數量是 1～yMax 的整數，類別不重複，說明寫出每一條', () => {
