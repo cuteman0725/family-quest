@@ -299,6 +299,15 @@ export interface BinsQ extends Base {
   items: { label: string; bin: number }[]
 }
 
+/** 找錯字：句子裡有一個錯字（sentence[wrong]），先點出來，再從 options 選出正確的字 */
+export interface TypoQ extends Base {
+  type: 'typo'
+  sentence: string
+  wrong: number
+  options: string[]
+  answer: number
+}
+
 /** 畫長條圖：照統計表，點格子把每一條長條畫到對的高度 */
 export interface BarBuildQ extends Base {
   type: 'barBuild'
@@ -337,6 +346,7 @@ export type Question =
   | ClockQ
   | BarBuildQ
   | BinsQ
+  | TypoQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {

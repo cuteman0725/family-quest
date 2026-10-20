@@ -405,6 +405,19 @@ describe.each(entries)('$where', ({ q, grade }) => {
       break
     }
 
+    case 'typo':
+      it('找錯字：錯字在句子裡只出現一次，選項有正確的字、沒有原本的錯字，說明寫出正確的字', () => {
+        const chars = [...q.sentence]
+        const wrong = chars[q.wrong]
+        expect(wrong, '找不到錯字').toBeDefined()
+        expect(chars.filter((c) => c === wrong)).toHaveLength(1)
+        expect(new Set(q.options).size).toBe(q.options.length)
+        expect(q.options).not.toContain(wrong)
+        expect(q.answer >= 0 && q.answer < q.options.length).toBe(true)
+        expect(q.explain).toContain(q.options[q.answer])
+      })
+      break
+
     case 'bins':
       it('分類：至少兩個籃子、每個籃子都有東西，項目不重複，說明寫出每個籃子', () => {
         expect(q.bins.length).toBeGreaterThanOrEqual(2)

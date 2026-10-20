@@ -1,0 +1,83 @@
+import { useState } from 'react'
+import type { TypoQ } from '../data/types'
+import { sfx } from '../lib/sfx'
+import type { GameProps } from './types'
+
+/** 標點和空白不能點 */
+const PUNCT = /[\s，。、！？；：「」『』（）]/
+
+/**
+ * 找錯字：先在句子裡點出寫錯的字，再選出正確的字。
+ * 點錯、選錯都會抖一下，自己改到對為止（自己訂正）。
+ */
+export function Typo({ q, onAnswer, locked }: GameProps<TypoQ>) {
+  const chars = [...q.sentence]
+  const [found, setFound] = useState(false)
+  const [fixed, setFixed] = useState(false)
+  const [mistakes, setMistakes] = useState(0)
+  const [shake, setShake] = useState<string | null>(null)
+
+  const miss = (key: string) => {
+    sfx.wrong()
+    setMistakes((m) => m + 1)
+    setShake(key)
+    setTimeout(() => setShake(null), 400)
+  }
+
+  const tapChar = (i: number) => {
+    if (locked || found) return
+    if (i !== q.wrong) return miss(`c${i}`)
+    sfx.tap()
+    setFound(true)
+  }
+
+  const pick = (i: number) => {
+    if (locked || fixed) return
+    if (i !== q.answer) return miss(`o${i}`)
+    sfx.tap()
+    setFixed(true)
+    setTimeout(() => onAnswer(mistakes === 0, { selfCorrected: true }), 500)
+  }
+
+  return (
+    <div className="picture-game">
+      <p className="typo-sentence">
+        {chars.map((c, i) =>
+          PUNCT.test(c) ? (
+            <span key={i} className="typo-punct">
+              {c}
+            </span>
+          ) : (
+            <button
+              key={i}
+              className={`typo-char ${found && i === q.wrong ? 'found' : ''} ${shake === `c${i}` ? 'shake' : ''}`}
+              disabled={locked}
+              onClick={() => tapChar(i)}
+            >
+              {fixed && i === q.wrong ? q.options[q.answer] : c}
+            </button>
+          ),
+        )}
+      </p>
+      {!found ? (
+        <p className="counter">句子裡有一個錯字，把它點出來</p>
+      ) : (
+        <>
+          <p className="counter">「{chars[q.wrong]}」要改成哪一個字？</p>
+          <div className="row-buttons wrap">
+            {q.options.map((o, i) => (
+              <button
+                key={o}
+                className={`big-btn ${shake === `o${i}` ? 'shake' : ''}`}
+                disabled={locked || fixed}
+                onClick={() => pick(i)}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

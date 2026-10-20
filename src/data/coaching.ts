@@ -59,6 +59,8 @@ export function activityFor(q: Question): string {
       return '拿一條繩子當數線，標 0、1、2，請她把繩子摺成一樣長的幾段，找出指定的分數在哪裡。'
     case 'clock':
       return '看家裡的時鐘，請她說現在是幾點；約好「7 點半洗澡」，時間到了請她自己看時鐘提醒你。'
+    case 'typo':
+      return '你寫一句話，故意寫錯一個字（例如「渾身發湯」），請她當小老師把錯字圈出來，再說說為什麼是另一個字。'
     case 'bins':
       return '寫幾張字卡（例如「媽、姊、河、海」），請她依部首分成兩堆，再說說看部首和字的意思有什麼關係。'
     case 'barBuild':

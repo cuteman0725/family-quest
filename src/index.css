@@ -2360,3 +2360,44 @@ p {
   font-size: 32px;
   letter-spacing: 2px;
 }
+
+/* ---------- 找錯字 ---------- */
+
+.typo-sentence {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 2px;
+  max-width: 680px;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.typo-char {
+  min-width: 44px;
+  height: 52px;
+  padding: 0 2px;
+  border: 2px solid transparent;
+  border-bottom: 2px dashed var(--line);
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+}
+
+.typo-char:active {
+  background: #fff1e6;
+}
+
+.typo-char.found {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: #fdeceb;
+}
+
+.typo-punct {
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+}

@@ -13,6 +13,7 @@ import { Equation } from './Equation'
 import { Clock } from './Clock'
 import { BarBuild } from './Chart'
 import { Bins } from './Bins'
+import { Typo } from './Typo'
 import { FracLine, FractionInput } from './Fraction'
 import { Choice, Compare, Same, TrueFalse } from './Buttons'
 import { Digits, NumberInput } from './Keypad'
@@ -83,5 +84,7 @@ export function GameView({ q, ...rest }: GameProps<Question>) {
       return <BarBuild q={q} {...rest} />
     case 'bins':
       return <Bins q={q} {...rest} />
+    case 'typo':
+      return <Typo q={q} {...rest} />
   }
 }
