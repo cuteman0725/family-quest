@@ -262,7 +262,7 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       <section className="question">
         {q.context && <pre className="context">{q.context}</pre>}
         {q.picture && (
-          <div className="q-picture" aria-hidden>
+          <div className={`q-picture ${q.picture.includes('\n') ? 'multi' : ''}`} aria-hidden>
             {q.picture}
           </div>
         )}

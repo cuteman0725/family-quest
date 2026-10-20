@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { g1u1 } from '../data/g1u1'
+import { g1u2 } from '../data/g1u2'
+import { g1u3 } from '../data/g1u3'
 import { g1u4 } from '../data/g1u4'
 import { g1u5 } from '../data/g1u5'
 import { g4u1 } from '../data/g4u1'
+import { g4u2 } from '../data/g4u2'
+import { g4u3 } from '../data/g4u3'
 import { g4u4 } from '../data/g4u4'
 import { g4u5 } from '../data/g4u5'
 import type { CompareQ, Question } from '../data/types'
@@ -20,7 +24,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u4, g4u5, g1u1, g1u4, g1u5].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g1u1, g1u2, g1u3, g1u4, g1u5].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
@@ -62,6 +66,31 @@ function checkVariant(original: Question, v: Question) {
         expect(String(v.divisor).length).toBe(String(original.divisor).length)
         expect(v.explain).toContain(`${Math.floor(v.dividend / v.divisor)} … ${v.dividend % v.divisor}`)
       } else expect(v).toBe(original)
+      break
+    case 'multiply':
+      if (original.type === 'multiply') {
+        expect(String(v.a).length).toBe(String(original.a).length)
+        expect(String(v.b).length).toBe(String(original.b).length)
+      }
+      expect(v.explain).toContain(String(v.a * v.b))
+      break
+    case 'angle':
+      if (v.ask === 'kind') expect((v.tilt ?? 0) + v.degrees <= 180).toBe(true)
+      if (v.ask === 'measure') expect(v.degrees % 10 === 0 && v.degrees >= 10 && v.degrees <= 170).toBe(true)
+      if (v.ask === 'draw') expect(v.degrees % 5 === 0 && v.prompt).toContain(String(v.degrees))
+      if (v.ask === 'compute') expect(v).toBe(original)
+      break
+    case 'length':
+      if (v.ask !== 'fair') {
+        const sizes = v.items.map((i) => i.size)
+        const extreme = v.ask === 'max' ? Math.max(...sizes) : Math.min(...sizes)
+        expect(sizes.filter((s) => s === extreme)).toHaveLength(1)
+        expect(sizes.every((s) => s >= 1 && s <= 10)).toBe(true)
+      } else expect(v.items.every((i) => (i.offset ?? 0) + i.size <= 11)).toBe(true)
+      break
+    case 'sequence':
+      expect(v.values.every((x) => x >= 1 && x <= 10)).toBe(true)
+      expect(v.values.length).toBe(original.type === 'sequence' ? original.values.length : 0)
       break
     case 'bond':
       expect(v.parts[0] + v.parts[1]).toBe(v.whole)

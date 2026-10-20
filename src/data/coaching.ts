@@ -39,6 +39,16 @@ export function activityFor(q: Question): string {
       return '拿一把硬幣或積木實際分分看，每份放一樣多，再數剩下幾個，對照直式的商和餘數。'
     case 'bond':
       return '拿幾顆豆子分成兩堆，請她說「7 可以分成 3 和 4」，再換一種分法。'
+    case 'multiply':
+      return '去超市時讓她算：一盒 35 元，買 12 盒要多少錢？先估一估，再用紙筆算。'
+    case 'angle':
+      return '用兩枝筷子在桌上比出角：比一個比直角小的、一個剛好直角、一個比直角大的，請她說出名字。'
+    case 'length':
+      return '拿兩枝筆，請她先把一頭對齊，再比哪一枝比較長。'
+    case 'order':
+      return '排幾個玩偶，問她：從左邊數第 3 個是誰？小熊前面有幾個？'
+    case 'sequence':
+      return '一起從 1 數到 10，再從 10 倒數回 1；你停在哪裡，就請她接著數。'
     case 'pair':
       return '用捲尺量家裡走廊有幾公尺，再一起想：走幾趟會有 1 公里（1000 公尺）？'
   }

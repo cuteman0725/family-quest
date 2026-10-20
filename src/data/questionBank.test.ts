@@ -170,6 +170,68 @@ describe.each(entries)('$where', ({ q, grade }) => {
       })
       break
 
+    case 'multiply':
+      it('兩個乘數至少 2，說明裡的積正確', () => {
+        expect(Number.isInteger(q.a) && q.a >= 2 && Number.isInteger(q.b) && q.b >= 2).toBe(true)
+        expect(q.explain).toContain(String(q.a * q.b))
+      })
+      break
+
+    case 'angle':
+      it('角度合理；組合圖每個標籤的度數都跟射線一致，∠A 就是答案', () => {
+        if (q.ask === 'kind') expect(q.degrees > 0 && q.degrees <= 180 && (q.tilt ?? 0) + q.degrees <= 180).toBe(true)
+        if (q.ask === 'measure') expect(q.degrees % 10 === 0 && q.degrees >= 10 && q.degrees <= 170).toBe(true)
+        if (q.ask === 'draw') expect(q.degrees % 5 === 0 && q.degrees >= 5 && q.degrees <= 180).toBe(true)
+        if (q.ask === 'compute') {
+          expect(q.figure).toBeDefined()
+          const { rays, arcs } = q.figure!
+          const target = arcs.filter((a) => a.label === 'A')
+          expect(target).toHaveLength(1)
+          expect(target[0].to - target[0].from).toBe(q.degrees)
+          for (const a of arcs) {
+            expect(rays).toContain(a.from)
+            expect(rays).toContain(a.to)
+            if (a.label === '∟') expect(a.to - a.from).toBe(90)
+            const deg = a.label.match(/^(\d+)°$/)
+            if (deg) expect(a.to - a.from, a.label).toBe(Number(deg[1]))
+          }
+        }
+      })
+      break
+
+    case 'length':
+      it('長條長度 1～10、不超出圖；比長短時最長（最短）只有一個', () => {
+        for (const it of q.items) {
+          expect(it.size >= 1 && it.size <= 10 && (it.offset ?? 0) >= 0 && (it.offset ?? 0) + it.size <= 11).toBe(true)
+        }
+        if (q.ask !== 'fair') {
+          const sizes = q.items.map((i) => i.size)
+          const extreme = q.ask === 'max' ? Math.max(...sizes) : Math.min(...sizes)
+          expect(sizes.filter((s) => s === extreme)).toHaveLength(1)
+          expect(q.items.every((i) => (i.offset ?? 0) === 0), '比長短時起點要對齊').toBe(true)
+        }
+      })
+      break
+
+    case 'order':
+      it('目標在隊伍裡，隊伍最多 10 個', () => {
+        expect(q.items.length >= 2 && q.items.length <= 10).toBe(true)
+        if (q.ask === 'which') expect(q.target >= 1 && q.target <= q.items.length).toBe(true)
+        else expect(q.target >= 0 && q.target < q.items.length).toBe(true)
+      })
+      break
+
+    case 'sequence':
+      it('數字一個比一個多 1（或少 1），空格位置合理', () => {
+        const step = q.values[1] - q.values[0]
+        expect(Math.abs(step)).toBe(1)
+        q.values.forEach((v, i) => i > 0 && expect(v - q.values[i - 1]).toBe(step))
+        expect(q.blanks.length).toBeGreaterThan(0)
+        expect(new Set(q.blanks).size).toBe(q.blanks.length)
+        expect(q.blanks.every((b) => b > 0 && b < q.values.length)).toBe(true)
+      })
+      break
+
     case 'bond':
       it('分合圖：兩部分合起來等於總數，總數最多 10', () => {
         expect(q.parts[0] + q.parts[1]).toBe(q.whole)

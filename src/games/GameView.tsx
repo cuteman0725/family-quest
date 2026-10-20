@@ -2,7 +2,11 @@ import type { Question } from '../data/types'
 import { Board } from './Board'
 import { Bond } from './Bond'
 import { Divide } from './Divide'
+import { Angle } from './Angle'
+import { Length } from './Length'
+import { Order } from './Order'
 import { Pair } from './Pair'
+import { Sequence } from './Sequence'
 import { Choice, Compare, Same, TrueFalse } from './Buttons'
 import { Digits, NumberInput } from './Keypad'
 import { Match } from './Match'
@@ -40,5 +44,21 @@ export function GameView({ q, ...rest }: GameProps<Question>) {
       return <Bond q={q} {...rest} />
     case 'pair':
       return <Pair q={q} {...rest} />
+    case 'multiply':
+      // 直式乘法：在紙上算，用數字鍵盤填積
+      return (
+        <NumberInput
+          q={{ id: q.id, type: 'number', prompt: q.prompt, hint: q.hint, answers: [String(q.a * q.b)], paper: true }}
+          {...rest}
+        />
+      )
+    case 'angle':
+      return <Angle q={q} {...rest} />
+    case 'length':
+      return <Length q={q} {...rest} />
+    case 'order':
+      return <Order q={q} {...rest} />
+    case 'sequence':
+      return <Sequence q={q} {...rest} />
   }
 }

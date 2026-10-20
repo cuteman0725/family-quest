@@ -130,6 +130,47 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
           : `${whole} 可以分成 ${parts[q.blank === 0 ? 1 : 0]} 和多少？`
       return { ...q, whole, parts, prompt, explain: `${parts[0]} 和 ${parts[1]} 合起來是 ${whole}。` }
     }
+    case 'multiply': {
+      const len = (n: number) => String(n).length
+      const a = int(rng, 10 ** (len(q.a) - 1), 10 ** len(q.a) - 1)
+      const b = int(rng, Math.max(2, 10 ** (len(q.b) - 1)), 10 ** len(q.b) - 1)
+      return { ...q, a, b, prompt: `用直式算算看：${a} × ${b}`, explain: `${a} × ${b} ＝ ${a * b}。` }
+    }
+    case 'angle': {
+      if (q.ask === 'compute') return q
+      if (q.ask === 'kind') {
+        const pool = [int(rng, 2, 17) * 5, 90, int(rng, 19, 34) * 5, 180]
+        const degrees = pool[int(rng, 0, 3)]
+        // 旋轉後兩條邊都要在上半部（0～180 度），圖才不會被切掉
+        return { ...q, degrees, tilt: int(rng, 0, Math.floor((180 - degrees) / 15)) * 15 }
+      }
+      const degrees = q.ask === 'measure' ? int(rng, 2, 17) * 10 : int(rng, 4, 34) * 5
+      const prompt = q.ask === 'draw' ? `以黑點為中心，畫出一個 ${degrees} 度的角。` : q.prompt
+      return { ...q, degrees, prompt, explain: q.ask === 'draw' ? `從 0 開始的那一圈，數到 ${degrees} 就是 ${degrees} 度。` : `這個角是 ${degrees} 度。` }
+    }
+    case 'length': {
+      if (q.ask === 'fair') {
+        const aligned = rng() < 0.5
+        const items = q.items.map((it, i) => ({ ...it, size: int(rng, 3, 8), offset: aligned || i === 0 ? 0 : int(rng, 1, 3) }))
+        return { ...q, items, explain: aligned ? '起點對齊了，這樣比是對的。' : '起點沒有對齊，要先把一頭對齊才能比。' }
+      }
+      // 換長度但保持只有一個最長（最短），差距至少 1
+      const sizes = q.items.map(() => int(rng, 2, 9))
+      const target = int(rng, 0, sizes.length - 1)
+      sizes[target] = q.ask === 'max' ? Math.max(...sizes) + 1 : Math.max(1, Math.min(...sizes) - 1)
+      for (let i = 0; i < sizes.length; i++) if (i !== target && sizes[i] === sizes[target]) sizes[i] += q.ask === 'max' ? -1 : 1
+      const items = q.items.map((it, i) => ({ ...it, size: Math.min(10, sizes[i]) }))
+      const word = q.ask === 'max' ? '最長' : '最短'
+      return { ...q, items, explain: `${items[target].label}${q.direction === 'vertical' ? (q.ask === 'max' ? '最高' : '最矮') : word}。` }
+    }
+    case 'sequence': {
+      const step = q.values[1] - q.values[0]
+      const n = q.values.length
+      const lo = step > 0 ? 1 : n
+      const start = int(rng, lo, step > 0 ? 10 - n + 1 : 10)
+      const values = Array.from({ length: n }, (_, i) => start + step * i)
+      return { ...q, values, explain: `${values.join('、')}，${step > 0 ? '一個比一個多 1' : '一個比一個少 1'}。` }
+    }
     default:
       return q
   }

@@ -128,6 +128,61 @@ export interface PairQ extends Base {
   paper?: boolean
 }
 
+/** 四年級：直式乘法，答案從兩個乘數算出來 */
+export interface MultiplyQ extends Base {
+  type: 'multiply'
+  a: number
+  b: number
+}
+
+/** 角度組合圖：從底邊（0°）逆時針畫出幾條射線，弧線標出各部分 */
+export interface AngleFigure {
+  rays: number[]
+  arcs: { from: number; to: number; label: string; level?: number }[]
+}
+
+/**
+ * 四年級角度：
+ * kind 判斷銳角／直角／鈍角／平角；measure 看量角器讀度數；
+ * draw 拖曳射線畫出指定角度；compute 看組合圖算出 ∠A（degrees 就是答案）
+ */
+export interface AngleQ extends Base {
+  type: 'angle'
+  ask: 'kind' | 'measure' | 'draw' | 'compute'
+  degrees: number
+  figure?: AngleFigure
+  /** 整張圖旋轉幾度，讓角不總是開口朝同一邊（kind 用） */
+  tilt?: number
+}
+
+/** 一年級：用長條比長短、高矮、厚薄；fair 是判斷起點有沒有對齊 */
+export interface LengthQ extends Base {
+  type: 'length'
+  items: { emoji: string; label: string; size: number; offset?: number }[]
+  /** horizontal 比長短；vertical 比高矮或厚薄 */
+  direction: 'horizontal' | 'vertical'
+  ask: 'max' | 'min' | 'fair'
+}
+
+/** 一年級：排排隊。position 第幾個；which 第 n 個是誰；before／after 前面、後面有幾個 */
+export interface OrderQ extends Base {
+  type: 'order'
+  items: { emoji: string; name: string }[]
+  /** 從哪一邊開始數；items 的順序固定是左到右、上到下 */
+  from: 'left' | 'right' | 'top' | 'bottom'
+  ask: 'position' | 'which' | 'before' | 'after'
+  /** position／before／after：目標在 items 裡的位置；which：從 from 數來第幾個（1 起算） */
+  target: number
+}
+
+/** 一年級：數字接龍，依序把空格填上 */
+export interface SequenceQ extends Base {
+  type: 'sequence'
+  values: number[]
+  /** 哪幾格是空的（values 的位置） */
+  blanks: number[]
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -143,6 +198,11 @@ export type Question =
   | DivideQ
   | BondQ
   | PairQ
+  | MultiplyQ
+  | AngleQ
+  | LengthQ
+  | OrderQ
+  | SequenceQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {

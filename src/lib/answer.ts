@@ -1,4 +1,31 @@
-import type { BondQ, DivideQ, Question } from '../data/types'
+import type { BondQ, DivideQ, LengthQ, OrderQ, Question } from '../data/types'
+
+export const ANGLE_KINDS = ['銳角', '直角', '鈍角', '平角'] as const
+export function angleKind(degrees: number) {
+  if (degrees < 90) return '銳角'
+  if (degrees === 90) return '直角'
+  if (degrees < 180) return '鈍角'
+  if (degrees === 180) return '平角'
+  return '周角'
+}
+
+/** 長度圖：最長／最短那一個的位置；fair 回傳起點是不是都對齊 */
+export function lengthAnswer(q: LengthQ): number | boolean {
+  if (q.ask === 'fair') return q.items.every((i) => (i.offset ?? 0) === (q.items[0].offset ?? 0))
+  const sizes = q.items.map((i) => i.size)
+  return sizes.indexOf(q.ask === 'max' ? Math.max(...sizes) : Math.min(...sizes))
+}
+
+/** 排排隊：which 回傳被點的位置（items 的 index）；其他回傳數字 */
+export function orderAnswer(q: OrderQ): number {
+  const n = q.items.length
+  const forward = q.from === 'left' || q.from === 'top'
+  if (q.ask === 'which') return forward ? q.target - 1 : n - q.target
+  const position = forward ? q.target + 1 : n - q.target
+  if (q.ask === 'position') return position
+  if (q.ask === 'before') return position - 1
+  return n - position
+}
 
 export const divideAnswer = (q: DivideQ) => ({
   quotient: Math.floor(q.dividend / q.divisor),
@@ -42,6 +69,20 @@ export function answerText(q: Question): string {
       return String(bondAnswer(q))
     case 'pair':
       return `${q.answers[0]} ${q.labels[0]}${q.joiner ? ` ${q.joiner} ` : ' '}${q.answers[1]} ${q.labels[1]}`
+    case 'multiply':
+      return `${q.a} × ${q.b} ＝ ${q.a * q.b}`
+    case 'angle':
+      return q.ask === 'kind' ? angleKind(q.degrees) : `${q.degrees} 度`
+    case 'length': {
+      const a = lengthAnswer(q)
+      return typeof a === 'boolean' ? (a ? '⭕ 對，起點對齊了' : '❌ 不對，起點沒有對齊') : `${q.items[a].emoji} ${q.items[a].label}`
+    }
+    case 'order': {
+      const a = orderAnswer(q)
+      return q.ask === 'which' ? `${q.items[a].emoji} ${q.items[a].name}` : String(a)
+    }
+    case 'sequence':
+      return q.values.join('、')
   }
 }
 
