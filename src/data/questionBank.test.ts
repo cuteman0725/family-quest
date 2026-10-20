@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { clockExplain, clockText, fractionAnswerText } from '../lib/answer'
+import { mixedText, parseFraction } from '../lib/fraction'
 import { lengthInMm } from '../lib/length'
+import { FRACTION_KINDS } from './g4u9'
 import type { Grade, Question } from './types'
 import { units } from './units'
 
@@ -31,6 +34,10 @@ function possibleValues(raw: string): number[] | null {
   if (mm !== null) return [mm]
   const wan = raw.match(/^(\d+)萬$/)
   if (wan) return [Number(wan[1]) * 10000]
+  if (/\/|分之/.test(raw)) {
+    const f = parseFraction(raw)
+    return f === null ? null : [f]
+  }
   const s = fromChinese(raw)
   if (/^\d+\.\d+$/.test(s)) return [Number(s)]
   if (!/^[\d?]+$/.test(s)) return null
@@ -96,6 +103,14 @@ describe.each(entries)('$where', ({ q, grade }) => {
         expect(new Set(q.options).size).toBe(q.options.length)
         expect(Number.isInteger(q.answer) && q.answer >= 0 && q.answer < q.options.length).toBe(true)
       })
+      if (q.options.join() === FRACTION_KINDS.join()) {
+        it('分數的種類跟分子、分母相符', () => {
+          const m = q.prompt.match(/^(?:(\d+) )?(\d+)\/(\d+) 是哪一種分數？$/)
+          expect(m).not.toBeNull()
+          const kind = m![1] ? '帶分數' : Number(m![2]) < Number(m![3]) ? '真分數' : '假分數'
+          expect(q.options[q.answer]).toBe(kind)
+        })
+      }
       // 「「A」和「B」的答案一樣嗎？」：兩個算式真的算一次
       const pair = q.prompt.match(/^「(.+)」和「(.+)」的答案一樣嗎？$/)
       if (pair) {
@@ -148,6 +163,17 @@ describe.each(entries)('$where', ({ q, grade }) => {
         expect(new Set(q.pairs.map((p) => p[0])).size).toBe(q.pairs.length)
         expect(new Set(q.pairs.map((p) => p[1])).size).toBe(q.pairs.length)
       })
+      if (q.pairs.every(([l, r]) => /\//.test(l + r))) {
+        it('分數連連看：每一組兩邊一樣大，帶分數的分子比分母小', () => {
+          for (const [l, r] of q.pairs) {
+            expect(parseFraction(l), `${l} ＝ ${r}`).toBe(parseFraction(r))
+            for (const side of [l, r]) {
+              const m = side.match(/^(\d+) (\d+)\/(\d+)$/)
+              if (m) expect(Number(m[2])).toBeLessThan(Number(m[3]))
+            }
+          }
+        })
+      }
       break
 
     case 'count':
@@ -279,11 +305,24 @@ describe.each(entries)('$where', ({ q, grade }) => {
       break
 
     case 'sort':
-      it('排序：至少 3 個、都是數字、不重複，說明照順序寫出來', () => {
+      if (q.order === 'steps') {
+        it('依先後排：steps 剛好把每一項排一次', () => {
+          expect(q.items.length).toBeGreaterThanOrEqual(3)
+          expect([...(q.steps ?? [])].sort()).toEqual(q.items.map((_, i) => i))
+          // 題目不能本來就排好
+          expect(q.steps).not.toEqual(q.items.map((_, i) => i))
+        })
+        break
+      }
+      it('排序：至少 3 個、都是數字（可以是分數）、不重複，說明照順序寫出來', () => {
         expect(q.items.length).toBeGreaterThanOrEqual(3)
-        expect(q.items.every((x) => /^\d+(\.\d+)?$/.test(x))).toBe(true)
-        expect(new Set(q.items.map(Number)).size).toBe(q.items.length)
-        const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? Number(b) - Number(a) : Number(a) - Number(b)))
+        const values = q.items.map((x) => (/^\d+\.\d+$/.test(x) ? Number(x) : parseFraction(x)))
+        expect(values.every((v) => v !== null)).toBe(true)
+        expect(new Set(values).size).toBe(q.items.length)
+        const sorted = q.items
+          .map((x, i) => ({ x, v: values[i]! }))
+          .sort((a, b) => (q.order === 'desc' ? b.v - a.v : a.v - b.v))
+          .map((e) => e.x)
         const sign = q.order === 'desc' ? ' ＞ ' : ' ＜ '
         expect(q.explain).toContain(sorted.join(sign))
       })
@@ -298,6 +337,50 @@ describe.each(entries)('$where', ({ q, grade }) => {
         expect(new Set(q.blanks).size).toBe(q.blanks.length)
         expect(q.blanks.every((b) => ['a', 'b', 'c'].includes(b))).toBe(true)
         expect(q.explain).toContain(String(c))
+      })
+      break
+    }
+
+    case 'fraction':
+      it('分數填答：分母至少 2；帶分數的分子比分母小；說明裡寫出答案；算算看的題目重算一次', () => {
+        expect(Number.isInteger(q.den) && q.den >= 2).toBe(true)
+        expect(q.answer.whole >= 0 && q.answer.num >= 0).toBe(true)
+        if (q.improper) expect(q.answer.whole).toBe(0)
+        else expect(q.answer.num).toBeLessThan(q.den)
+        expect(q.explain).toContain(fractionAnswerText(q))
+        const value = (q.answer.whole * q.den + q.answer.num) / q.den
+        const calc = q.prompt.match(/^算算看：(\S+(?: \d+\/\d+)?) ([＋－]) (\S+(?: \d+\/\d+)?)$/)
+        if (calc) {
+          const [a, b] = [parseFraction(calc[1])!, parseFraction(calc[3])!]
+          expect(calc[2] === '＋' ? a + b : a - b).toBeCloseTo(value)
+        }
+        const conv = q.prompt.match(/^把 (.+) 換成(帶分數|假分數)。$/)
+        if (conv) expect(parseFraction(conv[1])).toBeCloseTo(value)
+      })
+      break
+
+    case 'fracLine':
+      it('數線：最多 24 小格，目標不在整數上，題目寫的分數就是目標', () => {
+        expect(q.den >= 2 && q.max >= 1 && q.den * q.max <= 24).toBe(true)
+        expect(q.target > 0 && q.target < q.den * q.max && q.target % q.den !== 0).toBe(true)
+        const text = q.show === 'mixed' ? mixedText(q.target, q.den) : `${q.target}/${q.den}`
+        expect(q.prompt).toContain(` ${text} `)
+        if (q.show === 'mixed') expect(q.target).toBeGreaterThan(q.den)
+      })
+      break
+
+    case 'clock': {
+      const valid = (t: { h: number; m: number }) => Number.isInteger(t.h) && t.h >= 1 && t.h <= 12 && (t.m === 0 || t.m === 30)
+      it('時鐘：1～12 點的整點或半點；說明跟時間一致；選項不重複', () => {
+        if (q.ask === 'read') {
+          expect(valid(q.time)).toBe(true)
+          expect(q.explain).toBe(clockExplain(q.time))
+        } else {
+          expect(q.options.every(valid)).toBe(true)
+          expect(new Set(q.options.map(clockText)).size).toBe(q.options.length)
+          expect(q.answer >= 0 && q.answer < q.options.length).toBe(true)
+          expect(q.explain).toContain(clockText(q.options[q.answer]))
+        }
       })
       break
     }

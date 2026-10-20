@@ -1,5 +1,7 @@
 // 用瀏覽器內建的語音朗讀題目（iPad Safari、Android Chrome 都支援）
 
+import { speakFractions } from './fraction'
+
 let voice: SpeechSynthesisVoice | null | undefined
 
 function pickVoice(): SpeechSynthesisVoice | null {
@@ -21,7 +23,7 @@ if (typeof window !== 'undefined' && window.speechSynthesis) {
 
 /** 把題目裡的符號換成唸得出來的字 */
 function speakable(text: string) {
-  return text
+  return speakFractions(text)
     .replace(/（\s*）|\(\s*\)|（　）|□/g, '空格')
     .replace(/\?/g, '問號')
     .replace(/>/g, '大於')

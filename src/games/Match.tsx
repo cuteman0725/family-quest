@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { MatchQ } from '../data/types'
 import { sfx } from '../lib/sfx'
 import type { GameProps } from './types'
+import { Rich } from './Rich'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -49,7 +50,7 @@ export function Match({ q, onAnswer, locked }: GameProps<MatchQ>) {
               setSel(i)
             }}
           >
-            {l}
+            <Rich text={l} />
           </button>
         ))}
       </div>
@@ -63,12 +64,12 @@ export function Match({ q, onAnswer, locked }: GameProps<MatchQ>) {
               disabled={locked || matched}
               onClick={() => pickRight(r)}
             >
-              {r}
+              <Rich text={r} />
             </button>
           )
         })}
       </div>
-      {mistakes > 0 && done.length < q.pairs.length && <p className="inline-hint">💡 {q.hint}</p>}
+      {mistakes > 0 && done.length < q.pairs.length && <p className="inline-hint">💡 <Rich text={q.hint} /></p>}
     </div>
   )
 }

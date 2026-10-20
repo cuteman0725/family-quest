@@ -7,6 +7,7 @@ import { g1u5 } from '../data/g1u5'
 import { g1u6 } from '../data/g1u6'
 import { g1u7 } from '../data/g1u7'
 import { g1u8 } from '../data/g1u8'
+import { g1u9 } from '../data/g1u9'
 import { g4u1 } from '../data/g4u1'
 import { g4u2 } from '../data/g4u2'
 import { g4u3 } from '../data/g4u3'
@@ -15,8 +16,11 @@ import { g4u5 } from '../data/g4u5'
 import { g4u6 } from '../data/g4u6'
 import { g4u7 } from '../data/g4u7'
 import { g4u8 } from '../data/g4u8'
+import { g4u9 } from '../data/g4u9'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
+import { clockExplain } from './answer'
+import { mixedText, parseFraction } from './fraction'
 import { lengthInMm } from './length'
 import { blocked, interleave, makeVariant } from './variants'
 
@@ -30,7 +34,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
@@ -38,6 +42,8 @@ function compareHolds(q: CompareQ) {
   const values = (s: string) =>
     lengthInMm(s) !== null
       ? [lengthInMm(s)!]
+      : /\//.test(s)
+        ? [parseFraction(s)!]
       : s.includes('?')
         ? Array.from({ length: 10 }, (_, d) => Number(s.replace('?', String(d))))
         : [Number(s)]
@@ -119,10 +125,24 @@ function checkVariant(original: Question, v: Question) {
       if (!v.emoji && v.blanks.length > 1) expect(v).toBe(original)
       break
     }
+    case 'fracLine':
+      expect(v.den * v.max <= 24 && v.target > 0 && v.target < v.den * v.max && v.target % v.den !== 0).toBe(true)
+      expect(v.prompt).toContain(v.show === 'mixed' ? mixedText(v.target, v.den) : `${v.target}/${v.den}`)
+      if (v.show === 'mixed') expect(v.target).toBeGreaterThan(v.den)
+      break
+    case 'clock':
+      if (v.ask === 'read') {
+        expect(v.time.h >= 1 && v.time.h <= 12).toBe(true)
+        expect(v.explain).toBe(clockExplain(v.time))
+      } else expect(v).toBe(original)
+      break
     case 'compare':
       if (lengthInMm(v.left) !== null) {
         // 長度天秤：兩邊都是長度，換成同單位比
         expect(lengthInMm(v.right)).not.toBeNull()
+      } else if (/\/|分之/.test(v.left + v.right)) {
+        // 分數天秤：一邊帶分數、一邊假分數，同分母
+        expect(`${v.left} ${v.right}`).toMatch(/^(\d+ )?\d+\/(\d+) (\d+ )?\d+\/\2$/)
       } else if (v.left.includes('.')) {
         // 小數天秤：兩邊都是阿拉伯數字的小數（國字題換成數字）
         expect(v.left).toMatch(/^\d+\.\d+$/)

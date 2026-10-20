@@ -2,6 +2,7 @@ import type { ChoiceQ, CompareQ, SameQ, TrueFalseQ } from '../data/types'
 import { sfx } from '../lib/sfx'
 import type { GameProps } from './types'
 import { Pile } from './Picture'
+import { Rich } from './Rich'
 
 export function TrueFalse({ q, onAnswer, locked }: GameProps<TrueFalseQ>) {
   return (
@@ -21,7 +22,7 @@ export function Choice({ q, onAnswer, locked }: GameProps<ChoiceQ>) {
     <div className="row-buttons wrap">
       {q.options.map((opt, i) => (
         <button key={opt} className="big-btn" disabled={locked} onClick={() => onAnswer(i === q.answer)}>
-          {opt}
+          <Rich text={opt} />
         </button>
       ))}
     </div>
@@ -32,9 +33,9 @@ export function Compare({ q, onAnswer, locked }: GameProps<CompareQ>) {
   return (
     <div className="compare">
       <div className="scale">
-        <div className="pan">{q.left}</div>
+        <div className="pan"><Rich text={q.left} /></div>
         <div className="fulcrum">⚖️</div>
-        <div className="pan">{q.right}</div>
+        <div className="pan"><Rich text={q.right} /></div>
       </div>
       <div className="row-buttons">
         {(['>', '=', '<'] as const).map((s) => (

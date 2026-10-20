@@ -1,4 +1,6 @@
 import type { CompareQ, Question } from '../data/types'
+import { clockExplain } from './answer'
+import { mixedText, parseFraction } from './fraction'
 import { kmText, lengthInMm } from './length'
 
 // 記憶卡到期時，數學題換數字再出一次，讓孩子提取「方法」而不是背「這題答案是 7」。
@@ -58,7 +60,29 @@ function decimalCompareVariant(q: CompareQ, rng: Rng): CompareQ {
 }
 
 /** 四年級天秤：產生同樣位數、從某一位開始不同的兩個數；一半的題目在後面藏一個 ? */
+/** 分數天秤：同分母的帶分數和假分數，常常只差一點點（或一樣大） */
+function fractionCompareVariant(q: CompareQ, rng: Rng): CompareQ {
+  const d = int(rng, 3, 12)
+  const w = int(rng, 1, 5)
+  const n = int(rng, 1, d - 1)
+  const mixed = `${w} ${n}/${d}`
+  const improper = `${w * d + n + int(rng, -2, 2)}/${d}`
+  const [left, right] = rng() < 0.5 ? [mixed, improper] : [improper, mixed]
+  const [l, r] = [parseFraction(left)!, parseFraction(right)!]
+  const answer = l > r ? '>' : l < r ? '<' : '='
+  return {
+    ...q,
+    prompt: '比比看',
+    left,
+    right,
+    answer,
+    hint: `把帶分數換成假分數再比：${mixed} ＝ ${w * d + n}/${d}。分母一樣，分子大的就比較大。`,
+    explain: `${mixed} ＝ ${w * d + n}/${d}，所以 ${left} ${answer} ${right}。`,
+  }
+}
+
 function compareVariant(q: CompareQ, rng: Rng): CompareQ {
+  if (/\/|分之/.test(q.left + q.right)) return fractionCompareVariant(q, rng)
   if (lengthInMm(q.left) !== null || lengthInMm(q.right) !== null) return lengthCompareVariant(q, rng)
   if (/[.點]/.test(q.left + q.right)) return decimalCompareVariant(q, rng)
   const length = Math.max(7, q.left.replace(/\D/g, '').length)
@@ -237,6 +261,28 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
       const start = int(rng, lo, step > 0 ? top - n + 1 : top)
       const values = Array.from({ length: n }, (_, i) => start + step * i)
       return { ...q, values, explain: `${values.join('、')}，${step > 0 ? '一個比一個多 1' : '一個比一個少 1'}。` }
+    }
+    case 'fracLine': {
+      // 不出整數點；帶分數題要比 1 大
+      const den = int(rng, 2, 8)
+      const max = den <= 6 ? int(rng, 2, 3) : 2
+      let target = int(rng, q.show === 'mixed' ? den + 1 : 1, den * max - 1)
+      if (target % den === 0) target += 1
+      const text = q.show === 'mixed' ? mixedText(target, den) : `${target}/${den}`
+      return {
+        ...q,
+        den,
+        max,
+        target,
+        prompt: `在數線上點出 ${text} 的位置。`,
+        explain: `一小格是 1/${den}，${text} 是從 0 往右數 ${target} 小格。`,
+      }
+    }
+    case 'clock': {
+      // 選時鐘的題目跟著故事走，保留原題；看時鐘的題目換時間
+      if (q.ask !== 'read') return q
+      const time = { h: int(rng, 1, 12), m: rng() < 0.5 ? 0 : 30 } as const
+      return { ...q, time, explain: clockExplain(time) }
     }
     default:
       return q

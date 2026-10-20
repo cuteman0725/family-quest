@@ -4,6 +4,7 @@ import { GameView } from '../games/GameView'
 import { answerText } from '../lib/answer'
 import { sfx } from '../lib/sfx'
 import { speak, stopSpeaking } from '../lib/speech'
+import { Rich } from '../games/Rich'
 
 export interface PlayResult {
   total: number
@@ -88,7 +89,7 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
               <li key={q.id} className={wrong ? 'wrong' : 'right'}>
                 <span className="mark">{wrong ? '✘' : '✔'}</span>
                 <span className="num">{i + 1}.</span>
-                <span className="text">{q.prompt}</span>
+                <span className="text"><Rich text={q.prompt} /></span>
               </li>
             )
           })}
@@ -260,14 +261,14 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       </header>
 
       <section className="question">
-        {q.context && <pre className="context">{q.context}</pre>}
+        {q.context && <pre className="context"><Rich text={q.context} /></pre>}
         {q.picture && (
           <div className={`q-picture ${q.picture.includes('\n') ? 'multi' : ''}`} aria-hidden>
             {q.picture}
           </div>
         )}
         <div className="prompt-row">
-          <p className="prompt">{q.prompt}</p>
+          <p className="prompt"><Rich text={q.prompt} /></p>
           <button className="icon-btn speak" aria-label="唸題目" onClick={() => speak(fullPrompt)}>
             🔊
           </button>
@@ -285,7 +286,7 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       {feedback.kind === 'hint' && (
         <div className="sheet">
           <p className="sheet-title">😮 差一點點！</p>
-          <p>💡 {q.hint}</p>
+          <p>💡 <Rich text={q.hint} /></p>
           <button className="big-btn primary" onClick={retry}>
             再試一次
           </button>
@@ -295,8 +296,8 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       {feedback.kind === 'reveal' && (
         <div className="sheet">
           <p className="sheet-title">一起來看答案</p>
-          <pre className="answer">{answerText(q)}</pre>
-          {q.explain && <p>{q.explain}</p>}
+          <pre className="answer"><Rich text={answerText(q)} /></pre>
+          {q.explain && <p><Rich text={q.explain} /></p>}
           <button className="big-btn primary" onClick={() => next(wrong)}>
             知道了 👍
           </button>

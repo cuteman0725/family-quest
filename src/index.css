@@ -1923,3 +1923,191 @@ p {
   .eq-cell { width: 56px; height: 56px; font-size: 28px; }
   .eq-op { font-size: 28px; }
 }
+
+/* ---------- 分數 ---------- */
+
+.frac-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  font-size: 0.82em;
+}
+
+.frac-num {
+  padding: 0 3px;
+  border-bottom: 2px solid currentColor;
+}
+
+.frac-den {
+  padding: 0 3px;
+}
+
+.frac-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.frac-input .frac {
+  font-size: 1em;
+  gap: 4px;
+}
+
+.frac-input .frac-den.fixed {
+  min-width: 64px;
+  text-align: center;
+  border-top: 3px solid var(--ink);
+  padding-top: 4px;
+}
+
+.frac-slot {
+  min-width: 64px;
+  height: 60px;
+  padding: 0 8px;
+  border: 3px dashed var(--muted);
+  border-radius: 14px;
+  background: var(--card);
+  font: inherit;
+  color: var(--ink);
+}
+
+.frac-slot.active {
+  border-style: solid;
+  border-color: var(--primary);
+  background: #fff1e6;
+}
+
+.frac-line {
+  width: 100%;
+  max-width: 700px;
+}
+
+.fl-axis {
+  stroke: var(--ink);
+  stroke-width: 4;
+}
+
+.fl-tick {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.fl-tick.whole {
+  stroke-width: 4;
+}
+
+.fl-label {
+  font-size: 24px;
+  font-weight: 800;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+.fl-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.fl-marker circle {
+  fill: var(--primary);
+  pointer-events: none;
+}
+
+.fl-picked {
+  font-size: 20px;
+  font-weight: 800;
+  text-anchor: middle;
+  fill: var(--primary);
+  pointer-events: none;
+}
+
+/* ---------- 時鐘 ---------- */
+
+.clock-rim {
+  fill: #fff;
+  stroke: var(--ink);
+  stroke-width: 5;
+}
+
+.clock-tick {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.clock-tick.big {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.clock-num {
+  font-size: 20px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--ink);
+}
+
+.clock-hand {
+  stroke-linecap: round;
+}
+
+.clock-hand.minute {
+  stroke: #2f6fb3;
+  stroke-width: 5;
+}
+
+.clock-hand.hour {
+  stroke: var(--danger);
+  stroke-width: 8;
+}
+
+.clock-pin {
+  fill: var(--ink);
+}
+
+.clock-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
+.clock-option {
+  padding: 8px;
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.clock-option:active {
+  border-color: var(--primary);
+}
+
+@media (max-width: 560px) {
+  .frac-slot { min-width: 52px; height: 50px; }
+  .clock-option svg { width: 120px; height: 120px; }
+}
+
+.clock-blank {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.clock {
+  max-width: 100%;
+  height: auto;
+}

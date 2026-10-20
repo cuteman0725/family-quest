@@ -1,4 +1,5 @@
-import type { BondQ, DivideQ, EquationQ, LengthQ, OrderQ, Question, SortQ, TriangleQ } from '../data/types'
+import type { BondQ, ClockTime, DivideQ, EquationQ, FractionQ, LengthQ, OrderQ, Question, SortQ, TriangleQ } from '../data/types'
+import { fractionText, mixedText, parseFraction } from './fraction'
 
 export const ANGLE_KINDS = ['銳角', '直角', '鈍角', '平角'] as const
 export function angleKind(degrees: number) {
@@ -26,10 +27,30 @@ export function triangleAnswer(q: TriangleQ): number | string {
 
 /** 排排看：正確的點選順序（items 的位置） */
 export const sortAnswer = (q: SortQ) =>
-  q.items
-    .map((s, i) => ({ v: Number(s), i }))
-    .sort((x, y) => (q.order === 'desc' ? y.v - x.v : x.v - y.v))
-    .map((x) => x.i)
+  q.order === 'steps'
+    ? (q.steps ?? [])
+    : q.items
+        .map((s, i) => ({ v: parseFraction(s) ?? Number(s), i }))
+        .sort((x, y) => (q.order === 'desc' ? y.v - x.v : x.v - y.v))
+        .map((x) => x.i)
+
+/** 分數填答對不對：值要一樣；帶分數的分子要比分母小（假分數要換成帶分數或整數） */
+export function fractionAnswerOk(q: FractionQ, whole: number, num: number) {
+  const target = q.answer.whole * q.den + q.answer.num
+  if (whole * q.den + num !== target) return false
+  return q.improper || num < q.den
+}
+
+export const fractionAnswerText = (q: FractionQ) =>
+  q.improper ? `${q.answer.whole * q.den + q.answer.num}/${q.den}` : fractionText(q.answer.whole, q.answer.num, q.den)
+
+export const clockText = (t: ClockTime) => `${t.h} ${t.m === 0 ? '點鐘' : '點半'}`
+
+/** 時鐘題的說明：短針、長針各指在哪裡 */
+export const clockExplain = (t: ClockTime) =>
+  t.m === 0
+    ? `短針指在 ${t.h}，長針指在 12，是 ${clockText(t)}。`
+    : `短針在 ${t.h} 和 ${(t.h % 12) + 1} 的中間，長針指在 6，是 ${clockText(t)}。`
 
 export const equationResult = (q: EquationQ) => (q.op === '+' ? q.a + q.b : q.a - q.b)
 
@@ -114,9 +135,15 @@ export function answerText(q: Question): string {
     case 'sort':
       return sortAnswer(q)
         .map((i) => q.items[i])
-        .join(q.order === 'desc' ? ' ＞ ' : ' ＜ ')
+        .join(q.order === 'desc' ? ' ＞ ' : q.order === 'asc' ? ' ＜ ' : ' → ')
     case 'equation':
       return `${q.a} ${q.op === '+' ? '＋' : '－'} ${q.b} ＝ ${equationResult(q)}`
+    case 'fraction':
+      return fractionAnswerText(q) + (q.unit ? ` ${q.unit}` : '')
+    case 'fracLine':
+      return q.show === 'mixed' ? mixedText(q.target, q.den) : `${q.target}/${q.den}`
+    case 'clock':
+      return clockText(q.ask === 'read' ? q.time : q.options[q.answer])
   }
 }
 

@@ -53,6 +53,12 @@ export function activityFor(q: Question): string {
       return '拿幾張價錢標籤（例如 12.5 元、12.05 元），請她排出哪個最貴、哪個最便宜，並說出先比哪一位。'
     case 'equation':
       return '拿糖果編故事：「你有 3 顆，我再給你 4 顆」，請她先說算式，再數一數答案。'
+    case 'fraction':
+      return '切一個披薩或蛋糕成 8 等份，拿走幾塊，請她說出「拿走 8 分之幾、還剩 8 分之幾」；超過一個時說成幾又幾分之幾。'
+    case 'fracLine':
+      return '拿一條繩子當數線，標 0、1、2，請她把繩子摺成一樣長的幾段，找出指定的分數在哪裡。'
+    case 'clock':
+      return '看家裡的時鐘，請她說現在是幾點；約好「7 點半洗澡」，時間到了請她自己看時鐘提醒你。'
     case 'triangle':
       return '剪一個紙三角形，把三個角撕下來拼在一起，看看會不會剛好拼成一直線（180 度）。'
     case 'pair':

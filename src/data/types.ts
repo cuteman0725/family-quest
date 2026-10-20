@@ -201,11 +201,15 @@ export interface TriangleQ extends Base {
   unknown?: 0 | 1 | 2
 }
 
-/** 排排看：依序點出由大到小（或由小到大）的數；答案從數值算出 */
+/**
+ * 排排看：依序點出由大到小（或由小到大）的數，答案從數值算出；
+ * order 是 steps 時依「事情的先後」排，steps 是正確順序的 items 索引。
+ */
 export interface SortQ extends Base {
   type: 'sort'
   items: string[]
-  order: 'desc' | 'asc'
+  order: 'desc' | 'asc' | 'steps'
+  steps?: number[]
 }
 
 /**
@@ -220,6 +224,40 @@ export interface EquationQ extends Base {
   blanks: ('a' | 'b' | 'c')[]
   emoji?: string
 }
+
+/**
+ * 分數填答：分母已經給了，填整數和分子（同分母加減、假分數換帶分數）。
+ * 帶分數要寫成分子比分母小；improper 時只填分子（換成假分數）。
+ */
+export interface FractionQ extends Base {
+  type: 'fraction'
+  den: number
+  answer: { whole: number; num: number }
+  improper?: boolean
+  unit?: string
+  paper?: boolean
+}
+
+/** 分數數線：0 到 max，每 1/den 一格，點出 target/den 的位置；show 決定題目寫成假分數還是帶分數 */
+export interface FracLineQ extends Base {
+  type: 'fracLine'
+  den: number
+  max: number
+  target: number
+  show: 'improper' | 'mixed'
+}
+
+/** 時鐘上的時間：一年級只有「幾點鐘」和「幾點半」 */
+export interface ClockTime {
+  h: number
+  m: 0 | 30
+}
+
+/** 時鐘：read 看時鐘選幾點；pick 從幾個時鐘裡找出題目說的時間 */
+export type ClockQ = Base & { type: 'clock' } & (
+    | { ask: 'read'; time: ClockTime }
+    | { ask: 'pick'; options: ClockTime[]; answer: number }
+  )
 
 export type Question =
   | TrueFalseQ
@@ -244,6 +282,9 @@ export type Question =
   | TriangleQ
   | SortQ
   | EquationQ
+  | FractionQ
+  | FracLineQ
+  | ClockQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {

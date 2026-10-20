@@ -6,6 +6,7 @@ import { currentUnitOf, taskStatuses } from '../lib/recommend'
 import { findQuestion } from '../lib/review'
 import { CARD_INTERVALS, cardsOf, dueCardIds, renameProfile, resetAll, setCurrentUnit, useSave } from '../lib/store'
 import { SkillMap } from './SkillMap'
+import { Rich } from '../games/Rich'
 
 /**
  * 家長頁：一次只看一個孩子（不把姊妹的分數並排，避免比較）。
@@ -146,7 +147,7 @@ export function Parent({ onBack }: { onBack: () => void }) {
             {stuck.map(({ id, q, misses }) => (
               <li key={id}>
                 <p className="stuck-q">
-                  錯 {misses} 次：{q!.prompt}
+                  錯 {misses} 次：<Rich text={q!.prompt} />
                 </p>
                 <p className="stuck-act">👉 {activityFor(q!)}</p>
               </li>

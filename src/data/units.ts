@@ -6,6 +6,7 @@ import { g1u5 } from './g1u5'
 import { g1u6 } from './g1u6'
 import { g1u7 } from './g1u7'
 import { g1u8 } from './g1u8'
+import { g1u9 } from './g1u9'
 import { g4u1 } from './g4u1'
 import { g4u2 } from './g4u2'
 import { g4u3 } from './g4u3'
@@ -14,9 +15,10 @@ import { g4u5 } from './g4u5'
 import { g4u6 } from './g4u6'
 import { g4u7 } from './g4u7'
 import { g4u8 } from './g4u8'
+import { g4u9 } from './g4u9'
 import type { Grade, Task, Unit } from './types'
 
-export const units: Unit[] = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8]
+export const units: Unit[] = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9]
 
 /**
  * 家長頁還沒設定「學校目前上到」時用的單元（2026/10/20 的學校進度）。
