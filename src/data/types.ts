@@ -89,6 +89,13 @@ export interface SameQ extends Base {
   answer: boolean
 }
 
+/** 一年級：直線數字棋盤，轉轉盤後依序點出經過的每一格（Ramani & Siegler） */
+export interface BoardQ extends Base {
+  type: 'board'
+  /** 終點的數字，棋盤是 1～size 從左排到右 */
+  size: number
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -100,12 +107,15 @@ export type Question =
   | PickNQ
   | FillToQ
   | SameQ
+  | BoardQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {
   id: string
   title: string
   icon: string
+  /** 技能地圖上的節點名稱，也是結果畫面說「你在練什麼」的用語 */
+  skill: string
   /** 朗讀用的簡短說明 */
   blurb: string
   questions: Question[]

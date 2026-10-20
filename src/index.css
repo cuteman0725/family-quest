@@ -1097,3 +1097,300 @@ p {
   .profile-card .avatar { font-size: 64px; }
   .res-btn { font-size: 16px; padding: 8px 12px; }
 }
+
+/* ---------- 結果畫面：資訊性回饋 ---------- */
+
+.feedback-card {
+  width: min(100%, 560px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px;
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-align: left;
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+.fb-progress {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.fb-skill {
+  color: var(--muted);
+}
+
+.fb-lit {
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: #fff4c7;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.fb-praise {
+  color: #2f7d56;
+  font-weight: 700;
+}
+
+.reward.small {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 24px;
+  font-size: 18px;
+}
+
+.reward.small strong {
+  font-size: 28px;
+}
+
+/* ---------- 技能地圖 ---------- */
+
+.skill-map {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-map h3 {
+  font-size: 22px;
+}
+
+.skill-nodes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.skill-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  background: var(--card);
+  text-align: center;
+}
+
+.skill-node.new {
+  opacity: 0.55;
+}
+
+.skill-node.lit {
+  border-color: #f2c94c;
+  background: #fff8d9;
+  box-shadow: 0 0 0 4px rgba(242, 201, 76, 0.25);
+}
+
+.sn-icon {
+  font-size: 36px;
+}
+
+.sn-name {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.sn-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.sn-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.skill-node.lit .sn-bar span {
+  background: #f2c94c;
+}
+
+.sn-label {
+  font-size: 15px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 數字棋盤 ---------- */
+
+.board-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.board {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+}
+
+.board-cell {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 1;
+  max-width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  font-size: clamp(16px, 4vw, 34px);
+  font-weight: 800;
+}
+
+.board-cell.start {
+  font-size: clamp(11px, 2.4vw, 18px);
+  background: var(--grass);
+  border-color: var(--grass-dark);
+}
+
+.board-cell.passed {
+  background: #e8f5ee;
+  border-color: var(--accent);
+}
+
+.board-cell.next {
+  border-color: var(--primary);
+  animation: pulse 0.8s infinite alternate;
+}
+
+@keyframes pulse {
+  to { box-shadow: 0 0 0 6px rgba(255, 138, 61, 0.35); }
+}
+
+.token {
+  position: absolute;
+  top: -70%;
+  font-size: clamp(20px, 5vw, 40px);
+}
+
+.board-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.spinner {
+  width: 80px;
+  height: 80px;
+  display: grid;
+  place-items: center;
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  background: var(--card);
+  font-size: 40px;
+  font-weight: 800;
+}
+
+.spinner.spun {
+  animation: spin 0.5s ease-out;
+}
+
+@keyframes spin {
+  from { transform: rotate(-360deg) scale(0.8); }
+}
+
+/* ---------- 家長頁 ---------- */
+
+.kid-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.kid-tab {
+  flex: 1;
+  padding: 12px;
+  border: 3px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.kid-tab.active {
+  border-color: var(--primary);
+  background: #fff1e6;
+}
+
+.memory-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.memory-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.memory-stats strong {
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.memory-stats span {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.stuck-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stuck-list li {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.stuck-q {
+  font-weight: 700;
+}
+
+.stuck-act {
+  margin-top: 6px;
+  color: #2f7d56;
+}
+
+.praise-card p {
+  font-size: 20px;
+}
+
+.note {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+@media (max-width: 560px) {
+  .feedback-card { font-size: 18px; padding: 16px; }
+  .fb-progress { font-size: 21px; }
+  .skill-nodes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .board { gap: 2px; }
+  .board-cell { border-width: 2px; border-radius: 8px; }
+}

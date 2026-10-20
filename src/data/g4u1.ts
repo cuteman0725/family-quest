@@ -243,28 +243,28 @@ export const g4u1: Unit = {
   source: '4上單元卷01（南一）',
   tasks: [
     {
-      id: 'g4u1-t1', title: '讀數字偵探', icon: '🔍', blurb: '判斷對或錯，抓出讀錯的數字！',
+      id: 'g4u1-t1', skill: '判斷讀法對錯', title: '讀數字偵探', icon: '🔍', blurb: '判斷對或錯，抓出讀錯的數字！',
       questions: [Q.tf1, Q.tf2, Q.tf3, Q.tf4, Q.tf5, Q.tf6, Q.tfv1, Q.tfv2],
     },
     {
-      id: 'g4u1-t2', title: '數字連連看', icon: '🔗', blurb: '把數字和讀法配對，再把讀法寫成數字。',
+      id: 'g4u1-t2', skill: '數字讀寫', title: '數字連連看', icon: '🔗', blurb: '把數字和讀法配對，再把讀法寫成數字。',
       questions: [Q.match1, Q.match2, Q.ch8digit, Q.ch10m, Q.n8015400, Q.n40090030],
     },
     {
-      id: 'g4u1-t3', title: '位值積木', icon: '🧱', blurb: '每個數字住在哪一位？',
+      id: 'g4u1-t3', skill: '位值', title: '位值積木', icon: '🧱', blurb: '每個數字住在哪一位？',
       questions: [Q.pv2, Q.pv6, Q.pv7, Q.pv47, Q.n306009, Q.n1000000, Q.n5020300, Q.nMillions],
     },
     {
-      id: 'g4u1-t4', title: '數字天秤', icon: '⚖️', blurb: '哪邊比較大？讓天秤告訴你。',
+      id: 'g4u1-t4', skill: '比大小', title: '數字天秤', icon: '⚖️', blurb: '哪邊比較大？讓天秤告訴你。',
       questions: [Q.cmp1, Q.cmp2, Q.cmp3, Q.cmp4, Q.cmpv1, Q.cmpv2, Q.dig1, Q.digv1],
     },
     {
-      id: 'g4u1-t5', title: '應用題工坊', icon: '📝', blurb: '拿出紙筆算一算，再把答案填進來。',
+      id: 'g4u1-t5', skill: '大數應用題', title: '應用題工坊', icon: '📝', blurb: '拿出紙筆算一算，再把答案填進來。',
       questions: [Q.wp1, Q.wp2, Q.wp3, Q.wp4, Q.wp5, Q.wp6],
     },
   ],
   boss: {
-    id: 'g4u1-boss', title: '單元一魔王', icon: '🐉', blurb: '整份單元卷，交卷後才知道答案！',
+    id: 'g4u1-boss', skill: '整份單元', title: '單元一魔王', icon: '🐉', blurb: '整份單元卷，交卷後才知道答案！',
     questions: [
       Q.tf1, Q.tf2, Q.tf3, Q.tf4, Q.tf5, Q.tf6,
       Q.pv2, Q.pv6, Q.pv7, Q.n306009, Q.n1000000, Q.n8015400, Q.n1yi, Q.nMillions, Q.nTenThousands,

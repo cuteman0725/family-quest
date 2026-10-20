@@ -23,6 +23,8 @@ export function answerText(q: Question): string {
       return `補 ${q.target - q.have} 個`
     case 'same':
       return q.answer ? '⭕ 一樣多' : '❌ 不一樣多'
+    case 'board':
+      return Array.from({ length: q.size }, (_, i) => i + 1).join('、')
   }
 }
 

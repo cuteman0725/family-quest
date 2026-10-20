@@ -10,6 +10,9 @@ export interface PlayResult {
   firstTry: number
   /** 第一次就答錯的題目 id（記憶卡依這個建卡） */
   wrongIds: string[]
+  /** 回想時間出了幾題、自己想起幾題（給結果畫面的資訊性回饋） */
+  recallTotal: number
+  recallCorrect: number
 }
 
 export type PlayMode = 'task' | 'boss' | 'review'
@@ -45,10 +48,12 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
   )
   const [missed, setMissed] = useState<Question[]>([])
   const pick = (ids: string[]) => task.questions.filter((q) => ids.includes(q.id))
-  const result = (): PlayResult => ({
+  const result = (recallCorrect = 0, recallTotal = 0): PlayResult => ({
     total: task.questions.length,
     firstTry: task.questions.length - missed.length,
     wrongIds: missed.map((q) => q.id),
+    recallTotal,
+    recallCorrect,
   })
 
   if (stage === 'exam') {
@@ -128,7 +133,7 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
         style="recall"
         grade={grade}
         onExit={onExit}
-        onDone={() => onFinish(result())}
+        onDone={(wrong) => onFinish(result(missed.length - wrong.length, missed.length))}
       />
     )
   }
@@ -147,7 +152,7 @@ export function Play({ task, mode, grade, onExit, onFinish }: Props) {
         setMissed(m)
         if (m.length > 0) setStage('recallIntro')
         else
-          onFinish({ total: task.questions.length, firstTry: task.questions.length, wrongIds: [] })
+          onFinish({ total: task.questions.length, firstTry: task.questions.length, wrongIds: [], recallTotal: 0, recallCorrect: 0 })
       }}
     />
   )

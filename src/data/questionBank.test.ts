@@ -43,6 +43,14 @@ describe('題庫結構', () => {
     expect(conflicts.map(label)).toEqual([])
   })
 
+  it('每個任務都有技能名稱，同一單元裡不重複（技能地圖的節點）', () => {
+    for (const u of units) {
+      const skills = u.tasks.map((t) => t.skill.trim())
+      expect(skills.every(Boolean)).toBe(true)
+      expect(new Set(skills).size).toBe(skills.length)
+    }
+  })
+
   it('每個任務和魔王關都有題目', () => {
     const empty = units.flatMap((u) => [...u.tasks, u.boss]).filter((t) => t.questions.length === 0)
     expect(empty.map((t) => t.id)).toEqual([])
@@ -130,6 +138,12 @@ describe.each(entries)('$where', ({ q, grade }) => {
     case 'same':
       it('答案跟兩邊的數量一致', () => {
         expect(q.answer).toBe(q.left.n === q.right.n)
+      })
+      break
+
+    case 'board':
+      it('棋盤是 5～20 格的直線', () => {
+        expect(Number.isInteger(q.size) && q.size >= 5 && q.size <= 20).toBe(true)
       })
       break
   }

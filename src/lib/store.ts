@@ -21,6 +21,8 @@ export interface Attempt {
   firstTry: number
   /** 第一次答錯的題目 id */
   wrongIds: string[]
+  /** 這次做了哪些題目（記憶卡複習每次不同；舊存檔沒有，從任務定義推回來） */
+  questionIds?: string[]
 }
 
 export interface Building {

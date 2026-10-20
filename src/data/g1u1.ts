@@ -29,6 +29,12 @@ const same = (id: string, l: [string, number], r: [string, number]): Question =>
   explain: `左邊 ${l[1]} 個，右邊 ${r[1]} 個，${l[1] === r[1] ? '一樣多' : '不一樣多'}。`,
 })
 
+const board = (id: string): Question => ({
+  id, type: 'board', size: 10, prompt: '轉一轉，走到 10！每走一格，就點一下那一格，跟著唸出來。',
+  hint: '從小熊站的地方，往右一格一格數過去。',
+  explain: '數字從左到右，一格比一格多 1：1、2、3……一直到 10。',
+})
+
 const picnic = [
   { emoji: '🧺', n: 1, label: '籃子' },
   { emoji: '☕', n: 4, label: '杯子' },
@@ -89,6 +95,11 @@ const Q = {
   shelfBall: scene('g1u1-paper-k4', shelf, '球', '顆', '櫃子裡'),
   shelfBook: scene('g1u1-paper-k5', shelf, '書', '本', '櫃子裡'),
   shelfCar: scene('g1u1-paper-k6', shelf, '玩具車', '輛', '櫃子裡'),
+
+  // 直線數字棋盤（Ramani & Siegler 2008）：1～10 從左到右，邊走邊點、邊聽每一格的數字
+  board1: board('g1u1-v-b1'),
+  board2: board('g1u1-v-b2'),
+  board3: board('g1u1-v-b3'),
 } satisfies Record<string, Question>
 
 export const g1u1: Unit = {
@@ -98,29 +109,34 @@ export const g1u1: Unit = {
   title: '10 以內的數',
   source: '數學1上單元卷01（康軒）',
   tasks: [
+    // 直線數字棋盤是研究證據最強的一年級機制，放第一個讓推薦先出現
     {
-      id: 'g1u1-t1', title: '數一數', icon: '🔢', blurb: '數數看有幾個。',
+      id: 'g1u1-t6', skill: '數的順序', title: '數字棋盤', icon: '🎲', blurb: '轉轉盤，一格一格走到 10。',
+      questions: [Q.board1, Q.board2, Q.board3],
+    },
+    {
+      id: 'g1u1-t1', skill: '數數', title: '數一數', icon: '🔢', blurb: '數數看有幾個。',
       questions: [Q.boat, Q.candy, Q.fish, Q.flower, Q.chick, Q.berry],
     },
     {
-      id: 'g1u1-t2', title: '圈圈看', icon: '👆', blurb: '點出剛好的數量。',
+      id: 'g1u1-t2', skill: '圈出數量', title: '圈圈看', icon: '👆', blurb: '點出剛好的數量。',
       questions: [Q.carrot, Q.apple7, Q.hat, Q.ball, Q.banana, Q.car],
     },
     {
-      id: 'g1u1-t3', title: '補補看', icon: '➕', blurb: '不夠的補上圈圈。',
+      id: 'g1u1-t3', skill: '補到一樣多', title: '補補看', icon: '➕', blurb: '不夠的補上圈圈。',
       questions: [Q.umbrella, Q.candle, Q.apple4, Q.bun, Q.donut, Q.frog],
     },
     {
-      id: 'g1u1-t4', title: '一樣多嗎', icon: '⚖️', blurb: '比比看兩邊一樣多嗎。',
+      id: 'g1u1-t4', skill: '比多少', title: '一樣多嗎', icon: '⚖️', blurb: '比比看兩邊一樣多嗎。',
       questions: [Q.sameApple, Q.samePencil, Q.samePet, Q.sameSnack, Q.sameSky, Q.zeroApple],
     },
     {
-      id: 'g1u1-t5', title: '整理櫃子', icon: '🧸', blurb: '找找看，數數看。',
+      id: 'g1u1-t5', skill: '找找數數', title: '整理櫃子', icon: '🧸', blurb: '找找看，數數看。',
       questions: [Q.basket, Q.cup, Q.juice, Q.shelfBall, Q.shelfBook, Q.shelfCar],
     },
   ],
   boss: {
-    id: 'g1u1-boss', title: '單元一魔王', icon: '🐲', blurb: '整份單元卷，做完才看答案！',
+    id: 'g1u1-boss', skill: '整份單元', title: '單元一魔王', icon: '🐲', blurb: '整份單元卷，做完才看答案！',
     questions: [
       Q.carrot, Q.apple7, Q.hat, Q.ball,
       Q.umbrella, Q.candle, Q.apple4, Q.bun,

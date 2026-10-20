@@ -1,10 +1,12 @@
 import { unitsForGrade } from '../data/units'
 import { costText, TASK_REWARD } from '../data/village'
+import { questionStates, skillMap } from '../lib/mastery'
 import { bossUnlocked, recommend, taskStatuses } from '../lib/recommend'
 import { REVIEW_MAX } from '../lib/review'
 import { sfx } from '../lib/sfx'
 import { speak } from '../lib/speech'
-import { dueCardIds, useSave } from '../lib/store'
+import { cardsOf, dueCardIds, useSave } from '../lib/store'
+import { SkillMap } from './SkillMap'
 
 interface Props {
   profileId: string
@@ -23,6 +25,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
   const isYoung = profile.grade === 1
   const due = dueCardIds(profileId, save)
   const reviewIds = due.slice(0, REVIEW_MAX)
+  const states = questionStates(units, attempts, cardsOf(profileId, save))
 
   return (
     <div className="screen kid-home">
@@ -115,6 +118,10 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
           </div>
         )
       })}
+
+      {units.map((unit) => (
+        <SkillMap key={unit.id} title={`我的技能地圖：${unit.title}`} nodes={skillMap(unit, states)} autoRead={isYoung} />
+      ))}
     </div>
   )
 }
