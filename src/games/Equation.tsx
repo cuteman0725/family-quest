@@ -10,7 +10,7 @@ type Slot = 'a' | 'b' | 'c'
 
 /**
  * 一年級算式：從左到右依序填空格，點錯會抖一下，自己改到填完（自己訂正）。
- * 加法的 a、b 都要填時，先填哪一個都可以（7＋3 和 3＋7 都對）。
+ * 加法的 a、b 都要填時，先填哪一個都可以（7＋3 和 3＋7 都對）；減法的圖是同一堆畫掉幾個。
  */
 export function Equation({ q, onAnswer, locked }: GameProps<EquationQ>) {
   const order = (['a', 'b', 'c'] as Slot[]).filter((s) => q.blanks.includes(s))
@@ -60,7 +60,8 @@ export function Equation({ q, onAnswer, locked }: GameProps<EquationQ>) {
     <div className="picture-game">
       {q.emoji && (
         <div className="bond-piles">
-          <Pile emoji={q.emoji} n={q.a} />
+          {/* 減法：同一堆畫掉 b 個 */}
+          <Pile emoji={q.emoji} n={q.a} crossed={q.op === '-' ? q.b : 0} />
           {q.op === '+' && (
             <>
               <div className="bond-divider" aria-hidden />

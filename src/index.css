@@ -1785,6 +1785,22 @@ p {
   border-radius: 18px;
 }
 
+.pile-item.gone {
+  display: inline-block;
+  position: relative;
+  opacity: 0.4;
+}
+
+.pile-item.gone::after {
+  content: '✖';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--danger);
+  font-size: 0.8em;
+}
+
 .pile-tens .pile-item {
   font-size: 38px;
 }

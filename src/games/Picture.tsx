@@ -5,7 +5,13 @@ import { NumberInput } from './Keypad'
 import type { GameProps } from './types'
 
 /** 一排最多 5 個，跟考卷上的排法一樣；超過 10 個時每 10 個圈成一組（10 個一數） */
-export function Pile({ emoji, n }: { emoji: string; n: number }) {
+/** 一堆東西；crossed 是最後幾個畫掉（減法：拿走、吃掉、飛走的） */
+export function Pile({ emoji, n, crossed = 0 }: { emoji: string; n: number; crossed?: number }) {
+  const item = (i: number) => (
+    <span key={i} className={`pile-item ${i >= n - crossed ? 'gone' : ''}`}>
+      {emoji}
+    </span>
+  )
   if (n === 0) return <div className="pile empty">（空空的）</div>
   if (n > 10) {
     const groups = Array.from({ length: Math.ceil(n / 10) }, (_, g) => Math.min(10, n - g * 10))
@@ -13,24 +19,14 @@ export function Pile({ emoji, n }: { emoji: string; n: number }) {
       <div className="pile-tens">
         {groups.map((size, g) => (
           <div key={g} className={`pile ${size === 10 ? 'ten' : ''}`}>
-            {Array.from({ length: size }, (_, i) => (
-              <span key={i} className="pile-item">
-                {emoji}
-              </span>
-            ))}
+            {Array.from({ length: size }, (_, i) => item(g * 10 + i))}
           </div>
         ))}
       </div>
     )
   }
   return (
-    <div className="pile">
-      {Array.from({ length: n }, (_, i) => (
-        <span key={i} className="pile-item">
-          {emoji}
-        </span>
-      ))}
-    </div>
+    <div className="pile">{Array.from({ length: n }, (_, i) => item(i))}</div>
   )
 }
 

@@ -38,6 +38,13 @@ function possibleValues(raw: string): number[] | null {
   return Array.from({ length: 10 }, (_, d) => Number(s.replace('?', String(d))))
 }
 
+/** "(48 ＋ 72) ÷ 6" → 20；只允許數字、四則符號和括號 */
+function evaluate(expr: string): number {
+  const js = expr.replace(/＋/g, '+').replace(/－/g, '-').replace(/×/g, '*').replace(/÷/g, '/')
+  if (!/^[\d+\-*/() ]+$/.test(js)) throw new Error(`看不懂的算式：${expr}`)
+  return Function(`return (${js})`)() as number
+}
+
 const holds = (a: number, op: string, b: number) => (op === '>' ? a > b : op === '<' ? a < b : a === b)
 
 describe('題庫結構', () => {
@@ -89,6 +96,15 @@ describe.each(entries)('$where', ({ q, grade }) => {
         expect(new Set(q.options).size).toBe(q.options.length)
         expect(Number.isInteger(q.answer) && q.answer >= 0 && q.answer < q.options.length).toBe(true)
       })
+      // 「「A」和「B」的答案一樣嗎？」：兩個算式真的算一次
+      const pair = q.prompt.match(/^「(.+)」和「(.+)」的答案一樣嗎？$/)
+      if (pair) {
+        it('兩個算式算出來，一樣不一樣跟答案相符', () => {
+          const [l, r] = [evaluate(pair[1]), evaluate(pair[2])]
+          expect(q.options[q.answer].includes('不一樣')).toBe(l !== r)
+          expect(q.explain).toContain(String(l))
+        })
+      }
       break
 
     case 'compare':
@@ -106,6 +122,12 @@ describe.each(entries)('$where', ({ q, grade }) => {
         expect(q.answers.length).toBeGreaterThan(0)
         for (const a of q.answers) expect(a).toMatch(q.decimal ? /^\d+(\.\d+)?$/ : /^\d+$/)
       })
+      const expr = q.prompt.match(/^算算看：(.+)$/)
+      if (expr) {
+        it('算式算出來就是答案', () => {
+          expect(String(evaluate(expr[1]))).toBe(q.answers[0])
+        })
+      }
       break
 
     case 'digits':

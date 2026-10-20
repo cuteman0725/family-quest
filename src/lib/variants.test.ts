@@ -6,6 +6,7 @@ import { g1u4 } from '../data/g1u4'
 import { g1u5 } from '../data/g1u5'
 import { g1u6 } from '../data/g1u6'
 import { g1u7 } from '../data/g1u7'
+import { g1u8 } from '../data/g1u8'
 import { g4u1 } from '../data/g4u1'
 import { g4u2 } from '../data/g4u2'
 import { g4u3 } from '../data/g4u3'
@@ -13,6 +14,7 @@ import { g4u4 } from '../data/g4u4'
 import { g4u5 } from '../data/g4u5'
 import { g4u6 } from '../data/g4u6'
 import { g4u7 } from '../data/g4u7'
+import { g4u8 } from '../data/g4u8'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
 import { lengthInMm } from './length'
@@ -28,7 +30,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
