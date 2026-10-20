@@ -4,14 +4,16 @@ import { sfx } from '../lib/sfx'
 import type { GameProps } from './types'
 
 /** 標點和空白不能點 */
-const PUNCT = /[\s，。、！？；：「」『』（）]/
+const PUNCT = /^[\s，。、！？；：「」『』（）]$/
 
 /**
  * 找錯字：先在句子裡點出寫錯的字，再選出正確的字。
  * 點錯、選錯都會抖一下，自己改到對為止（自己訂正）。
  */
 export function Typo({ q, onAnswer, locked }: GameProps<TypoQ>) {
-  const chars = [...q.sentence]
+  // 可以點的單位：一個字，或一個語詞
+  const chars = q.words ?? [...q.sentence]
+  const unit = q.words ? '語詞' : '字'
   const [found, setFound] = useState(false)
   const [fixed, setFixed] = useState(false)
   const [mistakes, setMistakes] = useState(0)
@@ -60,10 +62,12 @@ export function Typo({ q, onAnswer, locked }: GameProps<TypoQ>) {
         )}
       </p>
       {!found ? (
-        <p className="counter">句子裡有一個錯字，把它點出來</p>
+        <p className="counter">{q.words ? '句子裡有一個語詞用得不對，把它點出來' : '句子裡有一個錯字，把它點出來'}</p>
       ) : (
         <>
-          <p className="counter">「{chars[q.wrong]}」要改成哪一個字？</p>
+          <p className="counter">
+            「{chars[q.wrong]}」要改成哪一個{unit}？
+          </p>
           <div className="row-buttons wrap">
             {q.options.map((o, i) => (
               <button

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { BinsQ } from '../data/types'
 import { sfx } from '../lib/sfx'
 import type { GameProps } from './types'
+import { ZHUYIN_ONLY } from '../lib/zhuyin'
 
 /** 分類：先點一個項目，再點它該去的籃子；放錯會抖一下，自己改到全部放好（自己訂正） */
 export function Bins({ q, onAnswer, locked }: GameProps<BinsQ>) {
@@ -33,7 +34,7 @@ export function Bins({ q, onAnswer, locked }: GameProps<BinsQ>) {
           placed.includes(i) ? null : (
             <button
               key={i}
-              className={`big-btn bins-item ${sel === i ? 'selected' : ''}`}
+              className={`big-btn bins-item ${ZHUYIN_ONLY.test(it.label) ? 'zhuyin-opt' : ''} ${sel === i ? 'selected' : ''}`}
               disabled={locked}
               onClick={() => {
                 sfx.tap()
@@ -54,7 +55,7 @@ export function Bins({ q, onAnswer, locked }: GameProps<BinsQ>) {
               {placed
                 .filter((i) => q.items[i].bin === bi)
                 .map((i) => (
-                  <span key={i} className="bin-chip">
+                  <span key={i} className={`bin-chip ${ZHUYIN_ONLY.test(q.items[i].label) ? 'zhuyin' : ''}`}>
                     {q.items[i].label}
                   </span>
                 ))}

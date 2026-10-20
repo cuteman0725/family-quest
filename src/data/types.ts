@@ -299,10 +299,14 @@ export interface BinsQ extends Base {
   items: { label: string; bin: number }[]
 }
 
-/** 找錯字：句子裡有一個錯字（sentence[wrong]），先點出來，再從 options 選出正確的字 */
+/**
+ * 找錯字：句子裡有一個錯字（sentence[wrong]），先點出來，再從 options 選出正確的字。
+ * 有 words 時改成以語詞為單位（找用錯的語詞），wrong 是 words 的索引，words 接起來就是 sentence。
+ */
 export interface TypoQ extends Base {
   type: 'typo'
   sentence: string
+  words?: string[]
   wrong: number
   options: string[]
   answer: number

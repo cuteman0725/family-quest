@@ -406,8 +406,9 @@ describe.each(entries)('$where', ({ q, grade }) => {
     }
 
     case 'typo':
-      it('找錯字：錯字在句子裡只出現一次，選項有正確的字、沒有原本的錯字，說明寫出正確的字', () => {
-        const chars = [...q.sentence]
+      it('找錯字：錯字（語詞）在句子裡只出現一次，選項有正確的、沒有原本錯的，說明寫出正確的', () => {
+        if (q.words) expect(q.words.join('')).toBe(q.sentence)
+        const chars = q.words ?? [...q.sentence]
         const wrong = chars[q.wrong]
         expect(wrong, '找不到錯字').toBeDefined()
         expect(chars.filter((c) => c === wrong)).toHaveLength(1)
