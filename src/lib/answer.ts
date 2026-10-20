@@ -1,4 +1,4 @@
-import type { BondQ, DivideQ, LengthQ, OrderQ, Question } from '../data/types'
+import type { BondQ, DivideQ, LengthQ, OrderQ, Question, TriangleQ } from '../data/types'
 
 export const ANGLE_KINDS = ['銳角', '直角', '鈍角', '平角'] as const
 export function angleKind(degrees: number) {
@@ -7,6 +7,21 @@ export function angleKind(degrees: number) {
   if (degrees < 180) return '鈍角'
   if (degrees === 180) return '平角'
   return '周角'
+}
+
+export const TRIANGLE_KINDS = ['銳角三角形', '直角三角形', '鈍角三角形'] as const
+export const TRIANGLE_SIDES = ['正三角形', '等腰三角形', '都不是'] as const
+
+/** 三角形題的答案：missing 回傳度數；kind、sides 回傳選項文字 */
+export function triangleAnswer(q: TriangleQ): number | string {
+  const [a, b, c] = q.angles
+  if (q.ask === 'missing') return 180 - q.angles.filter((_, i) => i !== q.unknown).reduce((s, x) => s + x, 0)
+  if (q.ask === 'kind') {
+    const big = Math.max(a, b, c)
+    return big < 90 ? '銳角三角形' : big === 90 ? '直角三角形' : '鈍角三角形'
+  }
+  if (a === b && b === c) return '正三角形'
+  return a === b || b === c || a === c ? '等腰三角形' : '都不是'
 }
 
 /** 長度圖：最長／最短那一個的位置；fair 回傳起點是不是都對齊 */
@@ -83,6 +98,10 @@ export function answerText(q: Question): string {
     }
     case 'sequence':
       return q.values.join('、')
+    case 'triangle': {
+      const a = triangleAnswer(q)
+      return typeof a === 'number' ? `${a} 度` : a
+    }
   }
 }
 

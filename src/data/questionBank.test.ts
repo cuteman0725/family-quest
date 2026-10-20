@@ -119,22 +119,23 @@ describe.each(entries)('$where', ({ q, grade }) => {
       break
 
     case 'count':
-      it('要數的東西在畫面裡，數量在 0～10，名稱不重複', () => {
+      it('要數的東西在畫面裡，數量在 0～30，名稱不重複', () => {
         expect(q.scene.map((s) => s.label)).toContain(q.ask)
         expect(new Set(q.scene.map((s) => s.label)).size).toBe(q.scene.length)
-        for (const s of q.scene) expect(s.n >= 0 && s.n <= 10).toBe(true)
+        for (const s of q.scene) expect(s.n >= 0 && s.n <= 30).toBe(true)
       })
       break
 
     case 'pickN':
-      it('要圈的數量在 1 到總數之間，總數最多 10', () => {
-        expect(q.n >= 1 && q.n <= q.total && q.total <= 10).toBe(true)
+      it('要圈（或畫掉）的數量在 1 到總數之間，總數最多 30', () => {
+        expect(q.n >= 1 && q.n <= q.total && q.total <= 30).toBe(true)
+        if (q.cross) expect(q.prompt).toContain(`要 ${q.total - q.n} `)
       })
       break
 
     case 'fillTo':
-      it('原本的數量比目標少，目標最多 10', () => {
-        expect(q.have >= 0 && q.have < q.target && q.target <= 10).toBe(true)
+      it('原本的數量比目標少，目標最多 30，最多補 10 個', () => {
+        expect(q.have >= 0 && q.have < q.target && q.target <= 30 && q.target - q.have <= 10).toBe(true)
       })
       break
 
@@ -228,7 +229,20 @@ describe.each(entries)('$where', ({ q, grade }) => {
         q.values.forEach((v, i) => i > 0 && expect(v - q.values[i - 1]).toBe(step))
         expect(q.blanks.length).toBeGreaterThan(0)
         expect(new Set(q.blanks).size).toBe(q.blanks.length)
-        expect(q.blanks.every((b) => b > 0 && b < q.values.length)).toBe(true)
+        expect(q.blanks.every((b) => b >= 0 && b < q.values.length)).toBe(true)
+        expect(q.blanks.length).toBeLessThan(q.values.length)
+        expect(q.values.every((v) => v >= 0 && v <= 30)).toBe(true)
+      })
+      break
+
+    case 'triangle':
+      it('三個角都是正整數、合起來 180 度；說明裡寫出答案', () => {
+        expect(q.angles.every((a) => Number.isInteger(a) && a > 0)).toBe(true)
+        expect(q.angles[0] + q.angles[1] + q.angles[2]).toBe(180)
+        if (q.ask === 'missing') {
+          expect(q.unknown).toBeDefined()
+          expect(q.explain).toContain(`＝ ${q.angles[q.unknown!]} 度`)
+        }
       })
       break
 

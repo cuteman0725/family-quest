@@ -1769,3 +1769,47 @@ p {
   .order-emoji { font-size: 30px; }
   .order-item { min-width: 48px; }
 }
+
+/* ---------- 30 以內：10 個一組、畫掉 ---------- */
+
+.pile-tens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pile.ten {
+  padding: 6px 8px;
+  border: 3px solid var(--primary);
+  border-radius: 18px;
+}
+
+.pile-tens .pile-item {
+  font-size: 38px;
+}
+
+.pick-item.crossed {
+  position: relative;
+  opacity: 0.45;
+  border-color: var(--danger);
+}
+
+.pick-item.crossed::after {
+  content: '✖';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--danger);
+  font-size: 44px;
+}
+
+/* ---------- 三角形 ---------- */
+
+.tri-shape {
+  fill: #e8f2fc;
+  stroke: #2f6fb3;
+  stroke-width: 4;
+  stroke-linejoin: round;
+}

@@ -10,7 +10,10 @@ export function Sequence({ q, onAnswer, locked }: GameProps<SequenceQ>) {
   const [mistakes, setMistakes] = useState(0)
   const [shake, setShake] = useState(false)
   const current = q.blanks[filled]
-  const max = Math.max(10, ...q.values)
+  // 只顯示附近的數字按鈕：30 以內的接龍不會一次跳出 31 個按鈕
+  const lo = Math.max(0, Math.min(...q.values) - 2)
+  const hi = Math.max(10, Math.max(...q.values) + 2)
+  const buttons = Array.from({ length: Math.min(hi - lo + 1, 15) }, (_, i) => lo + i)
 
   const press = (n: number) => {
     if (locked || current === undefined) return
@@ -43,7 +46,7 @@ export function Sequence({ q, onAnswer, locked }: GameProps<SequenceQ>) {
         })}
       </div>
       <div className="number-row">
-        {Array.from({ length: max + 1 }, (_, n) => (
+        {buttons.map((n) => (
           <button key={n} className="key round" disabled={locked || current === undefined} onClick={() => press(n)}>
             {n}
           </button>

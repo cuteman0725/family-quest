@@ -67,12 +67,13 @@ export interface CountQ extends Base {
   ask: string
 }
 
-/** 一年級：點選剛好 n 個 */
+/** 一年級：點選剛好 n 個；cross 時是「把多的畫掉」，點到的打 ✖ */
 export interface PickNQ extends Base {
   type: 'pickN'
   emoji: string
   total: number
   n: number
+  cross?: boolean
 }
 
 /** 一年級：補畫○，補到跟數字一樣多 */
@@ -183,6 +184,19 @@ export interface SequenceQ extends Base {
   blanks: number[]
 }
 
+/**
+ * 四年級三角形：依三個角畫出比例正確的三角形。
+ * angles 依序是左下、右下、頂點的角。
+ * missing 求 unknown 那個角（答案是 180 減另外兩個）；kind 判斷銳角／直角／鈍角三角形；
+ * sides 判斷正三角形／等腰三角形／都不是
+ */
+export interface TriangleQ extends Base {
+  type: 'triangle'
+  angles: [number, number, number]
+  ask: 'missing' | 'kind' | 'sides'
+  unknown?: 0 | 1 | 2
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -203,6 +217,7 @@ export type Question =
   | LengthQ
   | OrderQ
   | SequenceQ
+  | TriangleQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {

@@ -49,6 +49,8 @@ export function activityFor(q: Question): string {
       return '排幾個玩偶，問她：從左邊數第 3 個是誰？小熊前面有幾個？'
     case 'sequence':
       return '一起從 1 數到 10，再從 10 倒數回 1；你停在哪裡，就請她接著數。'
+    case 'triangle':
+      return '剪一個紙三角形，把三個角撕下來拼在一起，看看會不會剛好拼成一直線（180 度）。'
     case 'pair':
       return '用捲尺量家裡走廊有幾公尺，再一起想：走幾趟會有 1 公里（1000 公尺）？'
   }

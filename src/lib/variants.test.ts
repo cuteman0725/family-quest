@@ -4,11 +4,13 @@ import { g1u2 } from '../data/g1u2'
 import { g1u3 } from '../data/g1u3'
 import { g1u4 } from '../data/g1u4'
 import { g1u5 } from '../data/g1u5'
+import { g1u6 } from '../data/g1u6'
 import { g4u1 } from '../data/g4u1'
 import { g4u2 } from '../data/g4u2'
 import { g4u3 } from '../data/g4u3'
 import { g4u4 } from '../data/g4u4'
 import { g4u5 } from '../data/g4u5'
+import { g4u6 } from '../data/g4u6'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
 import { lengthInMm } from './length'
@@ -24,7 +26,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g1u1, g1u2, g1u3, g1u4, g1u5].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
@@ -45,16 +47,18 @@ function checkVariant(original: Question, v: Question) {
   expect(v.type).toBe(original.type)
   switch (v.type) {
     case 'count':
-      for (const s of v.scene) expect(s.n >= 0 && s.n <= 10).toBe(true)
+      for (const s of v.scene) expect(s.n >= 0 && s.n <= 30).toBe(true)
       expect(v.scene.map((s) => s.label)).toContain(v.ask)
       break
     case 'pickN':
       expect(v.n >= 1 && v.n <= v.total).toBe(true)
-      expect(v.prompt).toContain(`圈出 ${v.n} 個`)
+      // 「畫掉多的」題保留原題；一般圈圈看的題目文字要跟著新數字改
+      if (v.cross) expect(v).toBe(original)
+      else expect(v.prompt).toContain(`圈出 ${v.n} 個`)
       break
     case 'fillTo':
-      expect(v.have >= 1 && v.have < v.target && v.target <= 10).toBe(true)
-      expect(v.prompt).toContain(`要有 ${v.target} 個`)
+      expect(v.have >= 1 && v.have < v.target && v.target <= 30 && v.target - v.have <= 10).toBe(true)
+      expect(v.prompt).toContain(`要有 ${v.target} `)
       break
     case 'same':
       expect(v.answer).toBe(v.left.n === v.right.n)
@@ -89,8 +93,13 @@ function checkVariant(original: Question, v: Question) {
       } else expect(v.items.every((i) => (i.offset ?? 0) + i.size <= 11)).toBe(true)
       break
     case 'sequence':
-      expect(v.values.every((x) => x >= 1 && x <= 10)).toBe(true)
+      expect(v.values.every((x) => x >= 1 && x <= 30)).toBe(true)
       expect(v.values.length).toBe(original.type === 'sequence' ? original.values.length : 0)
+      break
+    case 'triangle':
+      expect(v.angles.every((a) => a > 0)).toBe(true)
+      expect(v.angles[0] + v.angles[1] + v.angles[2]).toBe(180)
+      if (v.ask === 'missing') expect(v.explain).toContain(`＝ ${v.angles[v.unknown!]} 度`)
       break
     case 'bond':
       expect(v.parts[0] + v.parts[1]).toBe(v.whole)

@@ -64,10 +64,12 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
   switch (q.type) {
     case 'count': {
       if (q.scene.length !== 1) return q
-      const n = intExcept(rng, 1, 10, q.scene[0].n)
+      // 10 以內的題目換 10 以內的數；30 以內的題目換 11～30
+      const n = q.scene[0].n > 10 ? intExcept(rng, 11, 30, q.scene[0].n) : intExcept(rng, 1, 10, q.scene[0].n)
       return { ...q, scene: [{ ...q.scene[0], n }], explain: `數一數，一共是 ${n}。` }
     }
     case 'pickN': {
+      if (q.cross) return q
       const n = intExcept(rng, 1, q.total - 1, q.n)
       return {
         ...q,
@@ -78,13 +80,13 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
       }
     }
     case 'fillTo': {
-      const target = intExcept(rng, 3, 10, q.target)
-      const have = int(rng, 1, target - 1)
+      const target = q.target > 10 ? intExcept(rng, 11, 30, q.target) : intExcept(rng, 3, 10, q.target)
+      const have = q.target > 10 ? int(rng, Math.max(1, target - 9), target - 1) : int(rng, 1, target - 1)
       return {
         ...q,
         have,
         target,
-        prompt: q.prompt.replace(/要有 \d+ 個/, `要有 ${target} 個`),
+        prompt: q.prompt.replace(/要有 \d+ /, `要有 ${target} `),
         hint: q.hint.replace(/數到 \d+/, `數到 ${target}`),
         explain: `已經有 ${have} 個，再補 ${target - have} 個就是 ${target} 個。`,
       }
@@ -163,11 +165,37 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
       const word = q.ask === 'max' ? '最長' : '最短'
       return { ...q, items, explain: `${items[target].label}${q.direction === 'vertical' ? (q.ask === 'max' ? '最高' : '最矮') : word}。` }
     }
+    case 'triangle': {
+      // 隨機兩個角（5 的倍數），第三個角補到 180；sides 題保留原本的邊的特性（正、等腰、都不是）
+      if (q.ask === 'sides') return q
+      let a = int(rng, 4, 20) * 5
+      let b = int(rng, 4, 20) * 5
+      while (a + b > 165) b -= 15
+      const angles: [number, number, number] = [a, b, 180 - a - b]
+      if (q.ask === 'kind' && rng() < 0.35) {
+        a = int(rng, 6, 12) * 5
+        angles[0] = a
+        angles[1] = 90
+        angles[2] = 90 - a
+      }
+      const unknown = q.unknown ?? 2
+      return {
+        ...q,
+        angles,
+        unknown,
+        explain:
+          q.ask === 'missing'
+            ? `三角形三個角合起來是 180 度：180 － ${angles.filter((_, i) => i !== unknown).join(' － ')} ＝ ${angles[unknown]} 度。`
+            : `最大的角是 ${Math.max(...angles)} 度。`,
+      }
+    }
     case 'sequence': {
       const step = q.values[1] - q.values[0]
       const n = q.values.length
+      // 維持原題的數字範圍（10 以內或 30 以內）
+      const top = Math.max(...q.values) > 10 ? 30 : 10
       const lo = step > 0 ? 1 : n
-      const start = int(rng, lo, step > 0 ? 10 - n + 1 : 10)
+      const start = int(rng, lo, step > 0 ? top - n + 1 : top)
       const values = Array.from({ length: n }, (_, i) => start + step * i)
       return { ...q, values, explain: `${values.join('、')}，${step > 0 ? '一個比一個多 1' : '一個比一個少 1'}。` }
     }
