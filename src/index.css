@@ -1530,3 +1530,11 @@ p {
   background: #fff1e6;
   font-weight: 700;
 }
+
+/* 題目旁的大圖（立體形狀等） */
+.q-picture {
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 88px;
+  line-height: 1.1;
+}

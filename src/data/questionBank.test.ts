@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { lengthInMm } from '../lib/length'
 import type { Grade, Question } from './types'
 import { units } from './units'
 
@@ -16,8 +17,10 @@ const entries: Entry[] = units.flatMap((u) =>
 )
 const label = (e: Entry) => e.where
 
-/** "6789萬" → 67890000；"84?6600" → ? 換成 0～9 的所有可能；看不懂的格式回傳 null */
+/** "6789萬" → 67890000；"84?6600" → ? 換成 0～9 的所有可能；"5 公里 500 公尺" → 毫米；看不懂的格式回傳 null */
 function possibleValues(s: string): number[] | null {
+  const mm = lengthInMm(s)
+  if (mm !== null) return [mm]
   const wan = s.match(/^(\d+)萬$/)
   if (wan) return [Number(wan[1]) * 10000]
   if (!/^[\d?]+$/.test(s)) return null
@@ -154,6 +157,16 @@ describe.each(entries)('$where', ({ q, grade }) => {
         const quotient = Math.floor(q.dividend / q.divisor)
         const remainder = q.dividend % q.divisor
         expect(q.explain).toContain(`${quotient} … ${remainder}`)
+      })
+      break
+
+    case 'pair':
+      it('兩格答案都是非負整數、說明裡寫出兩個答案；公尺換公里的題目重算答案', () => {
+        expect(q.answers.every((n) => Number.isInteger(n) && n >= 0)).toBe(true)
+        expect(q.labels.every((l) => l.trim() !== '')).toBe(true)
+        for (const n of q.answers) expect(q.explain).toContain(String(n))
+        const m = q.prompt.match(/^(\d+) 公尺 ＝ （　）公里（　）公尺$/)
+        if (m) expect(q.answers).toEqual([Math.floor(Number(m[1]) / 1000), Number(m[1]) % 1000])
       })
       break
 

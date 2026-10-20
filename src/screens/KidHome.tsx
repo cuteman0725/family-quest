@@ -1,4 +1,4 @@
-import { unitsForGrade } from '../data/units'
+import { DEFAULT_CURRENT_UNIT, unitsForGrade } from '../data/units'
 import { costText, TASK_REWARD } from '../data/village'
 import { questionStates, skillMap } from '../lib/mastery'
 import { bossUnlocked, currentUnitOf, recommend, taskStatuses } from '../lib/recommend'
@@ -21,7 +21,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
   const profile = save.profiles.find((p) => p.id === profileId)!
   const attempts = save.attempts[profileId] ?? []
   const units = unitsForGrade(profile.grade)
-  const current = currentUnitOf(units, profile.currentUnit)
+  const current = currentUnitOf(units, profile.currentUnit, DEFAULT_CURRENT_UNIT[profile.grade])
   const picks = recommend(taskStatuses(units, attempts), 3, current?.id)
   // 魔王關：目前單元一定顯示；其他單元解鎖了才顯示
   const bossUnits = units.filter((u) => u.id === current?.id || bossUnlocked(u, attempts))

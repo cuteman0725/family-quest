@@ -30,9 +30,9 @@ export function recommend(statuses: TaskStatus[], count = 3, currentUnitId?: str
   return [...statuses].sort((a, b) => rank(a) - rank(b)).slice(0, count)
 }
 
-/** 這個孩子的目前單元：家長設定的，沒有就用最新的單元 */
-export const currentUnitOf = (units: Unit[], currentUnit?: string) =>
-  units.find((u) => u.id === currentUnit) ?? units.at(-1)
+/** 這個孩子的目前單元：家長設定的 → 預設的學校進度 → 第一個單元 */
+export const currentUnitOf = (units: Unit[], currentUnit?: string, fallback?: string) =>
+  units.find((u) => u.id === currentUnit) ?? units.find((u) => u.id === fallback) ?? units[0]
 
 /** 單元裡每個短任務都完成過一次，就能挑戰魔王關 */
 export const bossUnlocked = (unit: Unit, attempts: Attempt[]) =>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { g4u1 } from '../data/g4u1'
 import { g4u4 } from '../data/g4u4'
+import { DEFAULT_CURRENT_UNIT, unitsForGrade } from '../data/units'
 import { bossUnlocked, currentUnitOf, recommend, taskStatuses } from './recommend'
 import type { Attempt } from './store'
 
@@ -42,9 +43,14 @@ describe('目前單元優先', () => {
     expect(picks.some((s) => s.unit.id === g4u1.id)).toBe(true)
   })
 
-  it('沒設定目前單元時用最新的單元', () => {
-    expect(currentUnitOf([g4u1, g4u4])?.id).toBe(g4u4.id)
-    expect(currentUnitOf([g4u1, g4u4], g4u1.id)?.id).toBe(g4u1.id)
+  it('目前單元：家長設定的優先，沒設定用預設的學校進度，都沒有就用第一個單元', () => {
+    expect(currentUnitOf([g4u1, g4u4], g4u1.id, g4u4.id)?.id).toBe(g4u1.id)
+    expect(currentUnitOf([g4u1, g4u4], undefined, g4u4.id)?.id).toBe(g4u4.id)
+    expect(currentUnitOf([g4u1, g4u4])?.id).toBe(g4u1.id)
+  })
+
+  it('預設的學校進度指到存在的單元', () => {
+    for (const [grade, id] of Object.entries(DEFAULT_CURRENT_UNIT)) expect(unitsForGrade(Number(grade) as 1 | 4).map((u) => u.id)).toContain(id)
   })
 })
 

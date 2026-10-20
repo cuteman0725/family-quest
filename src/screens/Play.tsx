@@ -261,6 +261,11 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
 
       <section className="question">
         {q.context && <pre className="context">{q.context}</pre>}
+        {q.picture && (
+          <div className="q-picture" aria-hidden>
+            {q.picture}
+          </div>
+        )}
         <div className="prompt-row">
           <p className="prompt">{q.prompt}</p>
           <button className="icon-btn speak" aria-label="唸題目" onClick={() => speak(fullPrompt)}>

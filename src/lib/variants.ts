@@ -1,4 +1,5 @@
 import type { CompareQ, Question } from '../data/types'
+import { kmText, lengthInMm } from './length'
 
 // 記憶卡到期時，數學題換數字再出一次，讓孩子提取「方法」而不是背「這題答案是 7」。
 // 變體沿用原題 id（記憶卡用 id 追蹤），只換數字和跟著數字變的文字。
@@ -16,8 +17,28 @@ function intExcept(rng: Rng, min: number, max: number, avoid: number) {
 const digits = (rng: Rng, length: number) =>
   Array.from({ length }, (_, i) => String(i === 0 ? int(rng, 1, 9) : int(rng, 0, 9)))
 
+/** 長度天秤：左邊「a 公里 b 公尺」，右邊換成公尺，差一點點或剛好相等 */
+function lengthCompareVariant(q: CompareQ, rng: Rng): CompareQ {
+  const km = int(rng, 1, 60)
+  const m = int(rng, 0, 999)
+  const total = km * 1000 + m
+  const shift = [-1, 0, 1][int(rng, 0, 2)] * [1, 10, 100, 1000][int(rng, 0, 3)]
+  const right = Math.max(1, total + shift)
+  const answer = total > right ? '>' : total < right ? '<' : '='
+  return {
+    ...q,
+    prompt: '比比看',
+    left: kmText(total),
+    right: `${right} 公尺`,
+    answer,
+    hint: '先把公里換成公尺（1 公里 ＝ 1000 公尺），單位一樣才能比。',
+    explain: `${kmText(total)} ＝ ${total} 公尺，${total} ${answer} ${right}。`,
+  }
+}
+
 /** 四年級天秤：產生同樣位數、從某一位開始不同的兩個數；一半的題目在後面藏一個 ? */
 function compareVariant(q: CompareQ, rng: Rng): CompareQ {
+  if (lengthInMm(q.left) !== null || lengthInMm(q.right) !== null) return lengthCompareVariant(q, rng)
   const length = Math.max(7, q.left.replace(/\D/g, '').length)
   const right = digits(rng, length)
   const left = [...right]

@@ -1,10 +1,18 @@
 import { g1u1 } from './g1u1'
 import { g1u4 } from './g1u4'
+import { g1u5 } from './g1u5'
 import { g4u1 } from './g4u1'
 import { g4u4 } from './g4u4'
+import { g4u5 } from './g4u5'
 import type { Grade, Task, Unit } from './types'
 
-export const units: Unit[] = [g4u1, g4u4, g1u1, g1u4]
+export const units: Unit[] = [g4u1, g4u4, g4u5, g1u1, g1u4, g1u5]
+
+/**
+ * 家長頁還沒設定「學校目前上到」時用的單元（2026/10/20 的學校進度）。
+ * 不用「最新的單元」當預設：題庫會超前做，最新的單元常常還沒教。
+ */
+export const DEFAULT_CURRENT_UNIT: Record<Grade, string> = { 4: 'g4u4', 1: 'g1u4' }
 
 /** 某個年級的單元，依課本單元順序排 */
 export const unitsForGrade = (grade: Grade) => units.filter((u) => u.grade === grade).sort((a, b) => a.number - b.number)

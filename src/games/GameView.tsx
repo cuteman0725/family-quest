@@ -2,6 +2,7 @@ import type { Question } from '../data/types'
 import { Board } from './Board'
 import { Bond } from './Bond'
 import { Divide } from './Divide'
+import { Pair } from './Pair'
 import { Choice, Compare, Same, TrueFalse } from './Buttons'
 import { Digits, NumberInput } from './Keypad'
 import { Match } from './Match'
@@ -37,5 +38,7 @@ export function GameView({ q, ...rest }: GameProps<Question>) {
       return <Divide q={q} {...rest} />
     case 'bond':
       return <Bond q={q} {...rest} />
+    case 'pair':
+      return <Pair q={q} {...rest} />
   }
 }

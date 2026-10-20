@@ -40,6 +40,8 @@ export function answerText(q: Question): string {
     }
     case 'bond':
       return String(bondAnswer(q))
+    case 'pair':
+      return `${q.answers[0]} ${q.labels[0]}${q.joiner ? ` ${q.joiner} ` : ' '}${q.answers[1]} ${q.labels[1]}`
   }
 }
 

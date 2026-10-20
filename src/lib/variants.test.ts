@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { g1u1 } from '../data/g1u1'
 import { g1u4 } from '../data/g1u4'
+import { g1u5 } from '../data/g1u5'
 import { g4u1 } from '../data/g4u1'
 import { g4u4 } from '../data/g4u4'
+import { g4u5 } from '../data/g4u5'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
+import { lengthInMm } from './length'
 import { blocked, interleave, makeVariant } from './variants'
 
 /** 可重現的亂數，讓失敗的案例能重跑 */
@@ -17,13 +20,17 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u4, g1u1, g1u4].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u4, g4u5, g1u1, g1u4, g1u5].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
-/** 天秤：? 換成 0～9 的每一種可能，答案都要成立 */
+/** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
 function compareHolds(q: CompareQ) {
   const values = (s: string) =>
-    s.includes('?') ? Array.from({ length: 10 }, (_, d) => Number(s.replace('?', String(d)))) : [Number(s)]
+    lengthInMm(s) !== null
+      ? [lengthInMm(s)!]
+      : s.includes('?')
+        ? Array.from({ length: 10 }, (_, d) => Number(s.replace('?', String(d))))
+        : [Number(s)]
   return values(q.left).every((a) =>
     values(q.right).every((b) => (q.answer === '>' ? a > b : q.answer === '<' ? a < b : a === b)),
   )
@@ -62,9 +69,14 @@ function checkVariant(original: Question, v: Question) {
       expect(v.prompt).not.toMatch(/[□?<>]/)
       break
     case 'compare':
-      expect(v.left).toMatch(/^[1-9][\d?]+$/)
-      expect(v.right).toMatch(/^[1-9]\d+$/)
-      expect(v.left.replace('?', '0').length).toBe(v.right.length)
+      if (lengthInMm(v.left) !== null) {
+        // 長度天秤：兩邊都是長度，換成同單位比
+        expect(lengthInMm(v.right)).not.toBeNull()
+      } else {
+        expect(v.left).toMatch(/^[1-9][\d?]+$/)
+        expect(v.right).toMatch(/^[1-9]\d+$/)
+        expect(v.left.replace('?', '0').length).toBe(v.right.length)
+      }
       expect(compareHolds(v), `${v.left} ${v.answer} ${v.right}`).toBe(true)
       break
   }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { activityFor, PARENT_PRAISE } from '../data/coaching'
-import { unitsForGrade } from '../data/units'
+import { DEFAULT_CURRENT_UNIT, unitsForGrade } from '../data/units'
 import { questionStates, skillMap } from '../lib/mastery'
 import { currentUnitOf, taskStatuses } from '../lib/recommend'
 import { findQuestion } from '../lib/review'
@@ -23,7 +23,7 @@ export function Parent({ onBack }: { onBack: () => void }) {
   const p = save.profiles.find((x) => x.id === pid) ?? save.profiles[0]
   const attempts = save.attempts[p.id] ?? []
   const units = unitsForGrade(p.grade)
-  const current = currentUnitOf(units, p.currentUnit)
+  const current = currentUnitOf(units, p.currentUnit, DEFAULT_CURRENT_UNIT[p.grade])
   const cards = cardsOf(p.id, save)
   const states = questionStates(units, attempts, cards)
   const strong = [...states.values()].filter((s) => s === 'strong').length

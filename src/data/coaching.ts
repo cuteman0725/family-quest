@@ -39,5 +39,7 @@ export function activityFor(q: Question): string {
       return '拿一把硬幣或積木實際分分看，每份放一樣多，再數剩下幾個，對照直式的商和餘數。'
     case 'bond':
       return '拿幾顆豆子分成兩堆，請她說「7 可以分成 3 和 4」，再換一種分法。'
+    case 'pair':
+      return '用捲尺量家裡走廊有幾公尺，再一起想：走幾趟會有 1 公里（1000 公尺）？'
   }
 }

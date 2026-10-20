@@ -8,6 +8,8 @@ interface Base {
   prompt: string
   /** 題組共用的情境文字或表格（逐行顯示） */
   context?: string
+  /** 題目旁邊的大圖（emoji）。放這裡而不寫進 prompt，朗讀時才不會把 emoji 念出來 */
+  picture?: string
   /** 引導重試時顯示的提示 */
   hint: string
   /** 第二次仍答錯時顯示的說明 */
@@ -116,6 +118,16 @@ export interface BondQ extends Base {
   emoji?: string
 }
 
+/** 兩格數字，例如「（ ）公里（ ）公尺」或「（ ）公尺＝（ ）公分」 */
+export interface PairQ extends Base {
+  type: 'pair'
+  answers: [number, number]
+  labels: [string, string]
+  /** 兩格中間的字，預設不加 */
+  joiner?: string
+  paper?: boolean
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -130,6 +142,7 @@ export type Question =
   | BoardQ
   | DivideQ
   | BondQ
+  | PairQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {
