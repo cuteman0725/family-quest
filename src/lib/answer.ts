@@ -144,6 +144,8 @@ export function answerText(q: Question): string {
       return q.show === 'mixed' ? mixedText(q.target, q.den) : `${q.target}/${q.den}`
     case 'clock':
       return clockText(q.ask === 'read' ? q.time : q.options[q.answer])
+    case 'barBuild':
+      return q.categories.map((c, i) => `${c} ${q.values[i]}`).join('、')
   }
 }
 

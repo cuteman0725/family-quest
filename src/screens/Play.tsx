@@ -5,6 +5,7 @@ import { answerText } from '../lib/answer'
 import { sfx } from '../lib/sfx'
 import { speak, stopSpeaking } from '../lib/speech'
 import { Rich } from '../games/Rich'
+import { Chart } from '../games/Chart'
 
 export interface PlayResult {
   total: number
@@ -262,6 +263,7 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
 
       <section className="question">
         {q.context && <pre className="context"><Rich text={q.context} /></pre>}
+        {q.chart && <Chart spec={q.chart} />}
         {q.picture && (
           <div className={`q-picture ${q.picture.includes('\n') ? 'multi' : ''}`} aria-hidden>
             {q.picture}

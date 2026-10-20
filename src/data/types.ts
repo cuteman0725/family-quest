@@ -10,10 +10,39 @@ interface Base {
   context?: string
   /** 題目旁邊的大圖（emoji）。放這裡而不寫進 prompt，朗讀時才不會把 emoji 念出來 */
   picture?: string
+  /** 題組共用的統計圖（長條圖、折線圖） */
+  chart?: Chart
   /** 引導重試時顯示的提示 */
   hint: string
   /** 第二次仍答錯時顯示的說明 */
   explain?: string
+}
+
+/** 統計圖的一組資料（一個班、一間餐廳） */
+export interface ChartSeries {
+  name: string
+  values: number[]
+  /** 折線圖在點旁邊寫出數字 */
+  labels?: boolean
+}
+
+/**
+ * 統計圖：bar 是長條圖（可以兩組並排），line 是折線圖。
+ * yMin 大於 0 時，縱軸下面畫「≈」表示中間省略。
+ */
+export interface Chart {
+  kind: 'bar' | 'line'
+  title: string
+  categories: string[]
+  series: ChartSeries[]
+  yMin?: number
+  yMax: number
+  /** 縱軸每隔多少寫一個數字 */
+  yStep: number
+  /** 格線的間隔（預設跟 yStep 一樣） */
+  yGrid?: number
+  xLabel: string
+  yLabel: string
 }
 
 /** 對的畫○，錯的打× */
@@ -47,6 +76,8 @@ export interface NumberQ extends Base {
   unit?: string
   /** 小數題：鍵盤多一個小數點，答案用數值比對（2.7 和 2.70 都算對） */
   decimal?: boolean
+  /** 年分這類不加千分位逗號的數字 */
+  plain?: boolean
 }
 
 /** 選出所有符合的數字 0～9 */
@@ -259,6 +290,16 @@ export type ClockQ = Base & { type: 'clock' } & (
     | { ask: 'pick'; options: ClockTime[]; answer: number }
   )
 
+/** 畫長條圖：照統計表，點格子把每一條長條畫到對的高度 */
+export interface BarBuildQ extends Base {
+  type: 'barBuild'
+  categories: string[]
+  values: number[]
+  yMax: number
+  yLabel: string
+  xLabel: string
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -285,6 +326,7 @@ export type Question =
   | FractionQ
   | FracLineQ
   | ClockQ
+  | BarBuildQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {

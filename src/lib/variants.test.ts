@@ -17,6 +17,7 @@ import { g4u6 } from '../data/g4u6'
 import { g4u7 } from '../data/g4u7'
 import { g4u8 } from '../data/g4u8'
 import { g4u9 } from '../data/g4u9'
+import { g4u10 } from '../data/g4u10'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
 import { clockExplain } from './answer'
@@ -34,7 +35,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g4u10, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
@@ -125,6 +126,11 @@ function checkVariant(original: Question, v: Question) {
       if (!v.emoji && v.blanks.length > 1) expect(v).toBe(original)
       break
     }
+    case 'barBuild':
+      expect(v.values.every((x) => x >= 1 && x <= v.yMax)).toBe(true)
+      expect(new Set(v.values).size).toBeGreaterThan(1)
+      v.categories.forEach((c, i) => expect(v.explain).toContain(`${c} ${v.values[i]}`))
+      break
     case 'fracLine':
       expect(v.den * v.max <= 24 && v.target > 0 && v.target < v.den * v.max && v.target % v.den !== 0).toBe(true)
       expect(v.prompt).toContain(v.show === 'mixed' ? mixedText(v.target, v.den) : `${v.target}/${v.den}`)

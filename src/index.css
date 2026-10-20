@@ -2111,3 +2111,153 @@ p {
   max-width: 100%;
   height: auto;
 }
+
+/* ---------- 統計圖 ---------- */
+
+.chart {
+  margin: 0 auto 8px;
+  max-width: 660px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 8px 8px 4px;
+}
+
+.chart svg {
+  width: 100%;
+  height: auto;
+}
+
+.chart figcaption {
+  text-align: center;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.ch-grid {
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.ch-axis {
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+
+.ch-break {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.ch-ytick {
+  font-size: 16px;
+  text-anchor: end;
+  dominant-baseline: central;
+  fill: var(--ink);
+}
+
+.ch-xtick {
+  font-size: 16px;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+.ch-axis-label,
+.ch-legend,
+.ch-series {
+  font-size: 15px;
+  fill: var(--ink);
+}
+
+.ch-axis-label.end {
+  text-anchor: end;
+}
+
+.ch-series {
+  font-weight: 800;
+  text-anchor: start;
+}
+
+.ch-bar {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.ch-line {
+  stroke-width: 3;
+}
+
+.ch-point {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.ch-table {
+  border-collapse: collapse;
+  font-size: 20px;
+  background: var(--card);
+}
+
+.ch-table th,
+.ch-table td {
+  border: 2px solid var(--line);
+  padding: 6px 14px;
+  text-align: center;
+}
+
+.ch-table th {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.bb-wrap {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.bb-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 30px;
+  font-size: 14px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.bb-axis span {
+  height: 0;
+  line-height: 0;
+}
+
+.bb-grid {
+  flex: 1;
+  display: grid;
+  gap: 10px;
+}
+
+.bb-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.bb-cell {
+  height: 34px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0;
+}
+
+.bb-cell.on {
+  background: #2f6fb3;
+  border-color: #24588f;
+}
+
+.bb-label {
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-weight: 800;
+}

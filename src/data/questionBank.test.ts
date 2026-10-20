@@ -91,6 +91,22 @@ describe.each(entries)('$where', ({ q, grade }) => {
     if (q.type !== 'match') expect(q.explain?.trim()).toBeTruthy()
   })
 
+  if (q.chart) {
+    const c = q.chart
+    it('統計圖：每組資料跟類別一樣多，數值在縱軸範圍內，讀得出來（落在格線上或兩條格線正中間）', () => {
+      const yMin = c.yMin ?? 0
+      expect((c.yMax - yMin) % c.yStep).toBe(0)
+      for (const s of c.series) {
+        expect(s.values).toHaveLength(c.categories.length)
+        for (const v of s.values) {
+          expect(v >= yMin && v <= c.yMax, `${s.name} ${v}`).toBe(true)
+          if (!s.labels) expect(((v - yMin) * 2) % (c.yGrid ?? c.yStep), `${s.name} ${v} 對不到格線`).toBe(0)
+        }
+      }
+      expect(new Set(c.series.map((s) => s.name)).size).toBe(c.series.length)
+    })
+  }
+
   if (grade === 1) {
     it('一年級題目會被朗讀，不放念不出來的符號', () => {
       expect(q.prompt).not.toMatch(/[□?<>＜＞]/)
@@ -384,6 +400,15 @@ describe.each(entries)('$where', ({ q, grade }) => {
       })
       break
     }
+
+    case 'barBuild':
+      it('畫長條圖：數量是 1～yMax 的整數，類別不重複，說明寫出每一條', () => {
+        expect(q.values).toHaveLength(q.categories.length)
+        expect(q.values.every((v) => Number.isInteger(v) && v >= 1 && v <= q.yMax)).toBe(true)
+        expect(new Set(q.categories).size).toBe(q.categories.length)
+        q.categories.forEach((c, i) => expect(q.explain).toContain(`${c} ${q.values[i]}`))
+      })
+      break
 
     case 'bond':
       it('分合圖：兩部分合起來等於總數，總數最多 10', () => {

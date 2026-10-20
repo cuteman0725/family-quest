@@ -29,7 +29,7 @@ export function NumberInput({ q, onAnswer, locked }: GameProps<NumberQ>) {
     <div className="keypad-wrap">
       {q.paper && <div className="paper-badge">✏️ 先在紙上算，再把答案填進來</div>}
       <div className="display">
-        <span className="digits">{value ? (q.decimal ? value : Number(value).toLocaleString('en-US')) : '　'}</span>
+        <span className="digits">{value ? (q.decimal || q.plain ? value : Number(value).toLocaleString('en-US')) : '　'}</span>
         {q.unit && <span className="unit">{q.unit}</span>}
       </div>
       <div className="keypad">

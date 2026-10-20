@@ -278,6 +278,12 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
         explain: `一小格是 1/${den}，${text} 是從 0 往右數 ${target} 小格。`,
       }
     }
+    case 'barBuild': {
+      // 換一組數量（不能每一條都一樣高）
+      let values = q.values.map(() => int(rng, 1, q.yMax))
+      while (new Set(values).size === 1) values = q.values.map(() => int(rng, 1, q.yMax))
+      return { ...q, values, explain: `照統計表畫：${q.categories.map((c, i) => `${c} ${values[i]}`).join('、')}。` }
+    }
     case 'clock': {
       // 選時鐘的題目跟著故事走，保留原題；看時鐘的題目換時間
       if (q.ask !== 'read') return q
