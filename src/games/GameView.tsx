@@ -8,6 +8,8 @@ import { Order } from './Order'
 import { Pair } from './Pair'
 import { Sequence } from './Sequence'
 import { Triangle } from './Triangle'
+import { Sort } from './Sort'
+import { Equation } from './Equation'
 import { Choice, Compare, Same, TrueFalse } from './Buttons'
 import { Digits, NumberInput } from './Keypad'
 import { Match } from './Match'
@@ -63,5 +65,9 @@ export function GameView({ q, ...rest }: GameProps<Question>) {
       return <Sequence q={q} {...rest} />
     case 'triangle':
       return <Triangle q={q} {...rest} />
+    case 'sort':
+      return <Sort q={q} {...rest} />
+    case 'equation':
+      return <Equation q={q} {...rest} />
   }
 }

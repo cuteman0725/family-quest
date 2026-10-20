@@ -5,12 +5,14 @@ import { g1u3 } from '../data/g1u3'
 import { g1u4 } from '../data/g1u4'
 import { g1u5 } from '../data/g1u5'
 import { g1u6 } from '../data/g1u6'
+import { g1u7 } from '../data/g1u7'
 import { g4u1 } from '../data/g4u1'
 import { g4u2 } from '../data/g4u2'
 import { g4u3 } from '../data/g4u3'
 import { g4u4 } from '../data/g4u4'
 import { g4u5 } from '../data/g4u5'
 import { g4u6 } from '../data/g4u6'
+import { g4u7 } from '../data/g4u7'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
 import { lengthInMm } from './length'
@@ -26,7 +28,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */
@@ -106,10 +108,23 @@ function checkVariant(original: Question, v: Question) {
       expect(v.whole <= 10 && v.parts.every((n) => n >= 1)).toBe(true)
       expect(v.prompt).not.toMatch(/[□?<>]/)
       break
+    case 'equation': {
+      const c = v.op === '+' ? v.a + v.b : v.a - v.b
+      expect(c >= 0 && c <= 10 && v.a >= 0 && v.b >= 0).toBe(true)
+      expect(v.explain).toContain(`等於 ${c}`)
+      expect(v.prompt).not.toMatch(/[□?<>＋－＝]/)
+      // 故事題保留原題（故事裡的數字換了會對不上）
+      if (!v.emoji && v.blanks.length > 1) expect(v).toBe(original)
+      break
+    }
     case 'compare':
       if (lengthInMm(v.left) !== null) {
         // 長度天秤：兩邊都是長度，換成同單位比
         expect(lengthInMm(v.right)).not.toBeNull()
+      } else if (v.left.includes('.')) {
+        // 小數天秤：兩邊都是阿拉伯數字的小數（國字題換成數字）
+        expect(v.left).toMatch(/^\d+\.\d+$/)
+        expect(v.right).toMatch(/^\d+(\.\d+)?$/)
       } else {
         expect(v.left).toMatch(/^[1-9][\d?]+$/)
         expect(v.right).toMatch(/^[1-9]\d+$/)

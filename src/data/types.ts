@@ -45,6 +45,8 @@ export interface NumberQ extends Base {
   /** 題目要用紙筆算，App 只收答案 */
   paper?: boolean
   unit?: string
+  /** 小數題：鍵盤多一個小數點，答案用數值比對（2.7 和 2.70 都算對） */
+  decimal?: boolean
 }
 
 /** 選出所有符合的數字 0～9 */
@@ -127,6 +129,8 @@ export interface PairQ extends Base {
   /** 兩格中間的字，預設不加 */
   joiner?: string
   paper?: boolean
+  /** 小數題：鍵盤多一個小數點 */
+  decimal?: boolean
 }
 
 /** 四年級：直式乘法，答案從兩個乘數算出來 */
@@ -197,6 +201,26 @@ export interface TriangleQ extends Base {
   unknown?: 0 | 1 | 2
 }
 
+/** 排排看：依序點出由大到小（或由小到大）的數；答案從數值算出 */
+export interface SortQ extends Base {
+  type: 'sort'
+  items: string[]
+  order: 'desc' | 'asc'
+}
+
+/**
+ * 一年級算式：「（a）＋（b）＝（c）」或減法，blanks 是要填的格子，依序從左到右填。
+ * 加法的 a、b 都要填時，順序對調也算對（7＋3 和 3＋7）。有 emoji 就把兩堆畫出來。
+ */
+export interface EquationQ extends Base {
+  type: 'equation'
+  a: number
+  b: number
+  op: '+' | '-'
+  blanks: ('a' | 'b' | 'c')[]
+  emoji?: string
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -218,6 +242,8 @@ export type Question =
   | OrderQ
   | SequenceQ
   | TriangleQ
+  | SortQ
+  | EquationQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {

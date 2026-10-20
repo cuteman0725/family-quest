@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { PairQ } from '../data/types'
 import { sfx } from '../lib/sfx'
+import { DECIMAL_KEYS, typeKey } from '../lib/keys'
 import type { GameProps } from './types'
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✔']
@@ -20,14 +21,15 @@ export function Pair({ q, onAnswer, locked }: GameProps<PairQ>) {
     }
     setValues((v) => {
       const next: [string, string] = [...v]
-      next[slot] = k === '⌫' ? v[slot].slice(0, -1) : v[slot].length < 8 ? v[slot] + k : v[slot]
+      next[slot] = typeKey(v[slot], k, 8)
       return next
     })
   }
 
+  const shown = (s: string) => (q.decimal ? s : Number(s).toLocaleString('en-US'))
   const box = (i: 0 | 1) => (
     <button className={`div-slot ${slot === i ? 'active' : ''}`} disabled={locked} onClick={() => setSlot(i)}>
-      <span className="div-value">{values[i] ? Number(values[i]).toLocaleString('en-US') : '　'}</span>
+      <span className="div-value">{values[i] ? shown(values[i]) : '　'}</span>
       <span className="div-label">{q.labels[i]}</span>
     </button>
   )
@@ -42,10 +44,10 @@ export function Pair({ q, onAnswer, locked }: GameProps<PairQ>) {
       </div>
       <p className="counter">點一下格子，再按數字；兩格都填好就按 ✔</p>
       <div className="keypad">
-        {KEYS.map((k) => (
+        {(q.decimal ? DECIMAL_KEYS : KEYS).map((k) => (
           <button
             key={k}
-            className={`key ${k === '✔' ? 'enter' : ''}`}
+            className={`key ${k === '✔' ? 'enter' : ''} ${k === '✔' && q.decimal ? 'wide' : ''}`}
             disabled={locked || (k === '✔' && !ready)}
             onClick={() => press(k)}
           >

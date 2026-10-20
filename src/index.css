@@ -1813,3 +1813,97 @@ p {
   stroke-width: 4;
   stroke-linejoin: round;
 }
+
+/* ---------- 小數：排大小、小數鍵盤 ---------- */
+
+.keypad .key.wide {
+  grid-column: 1 / -1;
+}
+
+.sort-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.sort-slot-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sort-slot {
+  min-width: 84px;
+  height: 56px;
+  padding: 0 10px;
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--muted);
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.sort-slot.filled {
+  border-style: solid;
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fff1e6;
+}
+
+.sort-sign {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+/* ---------- 一年級算式 ---------- */
+
+.eq-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.eq-cell {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: var(--card);
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.eq-cell.blank {
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.eq-cell.filled {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.eq-cell.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fff1e6;
+}
+
+.eq-op {
+  font-size: 36px;
+  font-weight: 800;
+}
+
+@media (max-width: 560px) {
+  .sort-slot { min-width: 64px; height: 48px; font-size: 20px; }
+  .eq-cell { width: 56px; height: 56px; font-size: 28px; }
+  .eq-op { font-size: 28px; }
+}

@@ -36,9 +36,31 @@ function lengthCompareVariant(q: CompareQ, rng: Rng): CompareQ {
   }
 }
 
+/** 小數天秤：常見陷阱是 6.08 和 6.8、3.14 和 3.41；產生同一個整數部分、小數位不同的兩個數 */
+function decimalCompareVariant(q: CompareQ, rng: Rng): CompareQ {
+  const whole = int(rng, 0, 30)
+  const d1 = int(rng, 0, 9)
+  const d2 = int(rng, 1, 9)
+  const left = `${whole}.${d1}${d2}`
+  const kinds = [`${whole}.${d2}${d1}`, `${whole}.${d1}`, `${whole}.${d2}`, `${whole + 1}.0${d2}`]
+  const right = kinds[int(rng, 0, kinds.length - 1)]
+  const [l, r] = [Number(left), Number(right)]
+  const answer = l > r ? '>' : l < r ? '<' : '='
+  return {
+    ...q,
+    prompt: '比比看',
+    left,
+    right,
+    answer,
+    hint: '先比整數部分；一樣的話，從十分位開始一位一位比。位數不夠可以在後面補 0 再比。',
+    explain: `${left} ${answer} ${right}。`,
+  }
+}
+
 /** 四年級天秤：產生同樣位數、從某一位開始不同的兩個數；一半的題目在後面藏一個 ? */
 function compareVariant(q: CompareQ, rng: Rng): CompareQ {
   if (lengthInMm(q.left) !== null || lengthInMm(q.right) !== null) return lengthCompareVariant(q, rng)
+  if (/[.點]/.test(q.left + q.right)) return decimalCompareVariant(q, rng)
   const length = Math.max(7, q.left.replace(/\D/g, '').length)
   const right = digits(rng, length)
   const left = [...right]
@@ -164,6 +186,23 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
       const items = q.items.map((it, i) => ({ ...it, size: Math.min(10, sizes[i]) }))
       const word = q.ask === 'max' ? '最長' : '最短'
       return { ...q, items, explain: `${items[target].label}${q.direction === 'vertical' ? (q.ask === 'max' ? '最高' : '最矮') : word}。` }
+    }
+    case 'equation': {
+      // 純計算或看圖題換數字；故事題（沒有圖、要寫整個算式）保留原題情境
+      if (!q.emoji && q.blanks.length > 1) return q
+      const a = q.op === '+' ? int(rng, 0, 9) : int(rng, 1, 10)
+      const b = q.op === '+' ? int(rng, 0, 10 - a) : int(rng, 0, a)
+      const c = q.op === '+' ? a + b : a - b
+      // 一年級會朗讀題目，用「加、減、等於」不用符號
+      const sign = q.op === '+' ? '加' : '減'
+      const prompt = q.emoji
+        ? q.prompt
+        : q.blanks.includes('a')
+          ? `幾${sign} ${b} 等於 ${c}？`
+          : q.blanks.includes('b')
+            ? `${a} ${sign}幾等於 ${c}？`
+            : `${a} ${sign} ${b} 等於多少？`
+      return { ...q, a, b, prompt, explain: `${a} ${sign} ${b} 等於 ${c}。` }
     }
     case 'triangle': {
       // 隨機兩個角（5 的倍數），第三個角補到 180；sides 題保留原本的邊的特性（正、等腰、都不是）

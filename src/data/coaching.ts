@@ -49,6 +49,10 @@ export function activityFor(q: Question): string {
       return '排幾個玩偶，問她：從左邊數第 3 個是誰？小熊前面有幾個？'
     case 'sequence':
       return '一起從 1 數到 10，再從 10 倒數回 1；你停在哪裡，就請她接著數。'
+    case 'sort':
+      return '拿幾張價錢標籤（例如 12.5 元、12.05 元），請她排出哪個最貴、哪個最便宜，並說出先比哪一位。'
+    case 'equation':
+      return '拿糖果編故事：「你有 3 顆，我再給你 4 顆」，請她先說算式，再數一數答案。'
     case 'triangle':
       return '剪一個紙三角形，把三個角撕下來拼在一起，看看會不會剛好拼成一直線（180 度）。'
     case 'pair':

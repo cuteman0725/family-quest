@@ -1,4 +1,4 @@
-import type { BondQ, DivideQ, LengthQ, OrderQ, Question, TriangleQ } from '../data/types'
+import type { BondQ, DivideQ, EquationQ, LengthQ, OrderQ, Question, SortQ, TriangleQ } from '../data/types'
 
 export const ANGLE_KINDS = ['銳角', '直角', '鈍角', '平角'] as const
 export function angleKind(degrees: number) {
@@ -23,6 +23,15 @@ export function triangleAnswer(q: TriangleQ): number | string {
   if (a === b && b === c) return '正三角形'
   return a === b || b === c || a === c ? '等腰三角形' : '都不是'
 }
+
+/** 排排看：正確的點選順序（items 的位置） */
+export const sortAnswer = (q: SortQ) =>
+  q.items
+    .map((s, i) => ({ v: Number(s), i }))
+    .sort((x, y) => (q.order === 'desc' ? y.v - x.v : x.v - y.v))
+    .map((x) => x.i)
+
+export const equationResult = (q: EquationQ) => (q.op === '+' ? q.a + q.b : q.a - q.b)
 
 /** 長度圖：最長／最短那一個的位置；fair 回傳起點是不是都對齊 */
 export function lengthAnswer(q: LengthQ): number | boolean {
@@ -102,6 +111,12 @@ export function answerText(q: Question): string {
       const a = triangleAnswer(q)
       return typeof a === 'number' ? `${a} 度` : a
     }
+    case 'sort':
+      return sortAnswer(q)
+        .map((i) => q.items[i])
+        .join(q.order === 'desc' ? ' ＞ ' : ' ＜ ')
+    case 'equation':
+      return `${q.a} ${q.op === '+' ? '＋' : '－'} ${q.b} ＝ ${equationResult(q)}`
   }
 }
 

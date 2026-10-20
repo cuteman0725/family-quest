@@ -17,12 +17,22 @@ const entries: Entry[] = units.flatMap((u) =>
 )
 const label = (e: Entry) => e.where
 
-/** "6789萬" → 67890000；"84?6600" → ? 換成 0～9 的所有可能；"5 公里 500 公尺" → 毫米；看不懂的格式回傳 null */
-function possibleValues(s: string): number[] | null {
-  const mm = lengthInMm(s)
+const CHINESE_DIGITS = '零一二三四五六七八九'
+
+/** "四點三七" → "4.37"；不是國字小數就原樣回傳 */
+const fromChinese = (s: string) =>
+  /^[零一二三四五六七八九]+點[零一二三四五六七八九]+$/.test(s)
+    ? [...s].map((c) => (c === '點' ? '.' : String(CHINESE_DIGITS.indexOf(c)))).join('')
+    : s
+
+/** "6789萬" → 67890000；"84?6600" → ? 換成 0～9 的所有可能；"5 公里 500 公尺" → 毫米；"四點三七" → 4.37；看不懂的格式回傳 null */
+function possibleValues(raw: string): number[] | null {
+  const mm = lengthInMm(raw)
   if (mm !== null) return [mm]
-  const wan = s.match(/^(\d+)萬$/)
+  const wan = raw.match(/^(\d+)萬$/)
   if (wan) return [Number(wan[1]) * 10000]
+  const s = fromChinese(raw)
+  if (/^\d+\.\d+$/.test(s)) return [Number(s)]
   if (!/^[\d?]+$/.test(s)) return null
   if (!s.includes('?')) return [Number(s)]
   return Array.from({ length: 10 }, (_, d) => Number(s.replace('?', String(d))))
@@ -92,15 +102,15 @@ describe.each(entries)('$where', ({ q, grade }) => {
       break
 
     case 'number':
-      it('答案只有數字', () => {
+      it(q.decimal ? '答案是數字或小數' : '答案只有數字', () => {
         expect(q.answers.length).toBeGreaterThan(0)
-        for (const a of q.answers) expect(a).toMatch(/^\d+$/)
+        for (const a of q.answers) expect(a).toMatch(q.decimal ? /^\d+(\.\d+)?$/ : /^\d+$/)
       })
       break
 
     case 'digits':
       it('選出的數字剛好是讓不等式成立的全部數字', () => {
-        const m = q.prompt.match(/([\d□]+)\s*([<>])\s*([\d□]+)/)
+        const m = q.prompt.match(/([\d.□]+)\s*([<>])\s*([\d.□]+)/)
         expect(m, '題目裡找不到「□ 的不等式」').not.toBeNull()
         const [, l, op, r] = m!
         const fits = Array.from({ length: 10 }, (_, d) => d).filter((d) =>
@@ -162,8 +172,8 @@ describe.each(entries)('$where', ({ q, grade }) => {
       break
 
     case 'pair':
-      it('兩格答案都是非負整數、說明裡寫出兩個答案；公尺換公里的題目重算答案', () => {
-        expect(q.answers.every((n) => Number.isInteger(n) && n >= 0)).toBe(true)
+      it('兩格答案都是非負整數（小數題可以是小數）、說明裡寫出兩個答案；公尺換公里的題目重算答案', () => {
+        expect(q.answers.every((n) => (q.decimal || Number.isInteger(n)) && n >= 0)).toBe(true)
         expect(q.labels.every((l) => l.trim() !== '')).toBe(true)
         for (const n of q.answers) expect(q.explain).toContain(String(n))
         const m = q.prompt.match(/^(\d+) 公尺 ＝ （　）公里（　）公尺$/)
@@ -245,6 +255,30 @@ describe.each(entries)('$where', ({ q, grade }) => {
         }
       })
       break
+
+    case 'sort':
+      it('排序：至少 3 個、都是數字、不重複，說明照順序寫出來', () => {
+        expect(q.items.length).toBeGreaterThanOrEqual(3)
+        expect(q.items.every((x) => /^\d+(\.\d+)?$/.test(x))).toBe(true)
+        expect(new Set(q.items.map(Number)).size).toBe(q.items.length)
+        const sorted = [...q.items].sort((a, b) => (q.order === 'desc' ? Number(b) - Number(a) : Number(a) - Number(b)))
+        const sign = q.order === 'desc' ? ' ＞ ' : ' ＜ '
+        expect(q.explain).toContain(sorted.join(sign))
+      })
+      break
+
+    case 'equation': {
+      const c = q.op === '+' ? q.a + q.b : q.a - q.b
+      it('算式：數字是 0～10 的整數、結果最多 10 不小於 0，空格合法，說明裡寫出結果', () => {
+        expect([q.a, q.b].every((n) => Number.isInteger(n) && n >= 0 && n <= 10)).toBe(true)
+        expect(c >= 0 && c <= 10).toBe(true)
+        expect(q.blanks.length).toBeGreaterThan(0)
+        expect(new Set(q.blanks).size).toBe(q.blanks.length)
+        expect(q.blanks.every((b) => ['a', 'b', 'c'].includes(b))).toBe(true)
+        expect(q.explain).toContain(String(c))
+      })
+      break
+    }
 
     case 'bond':
       it('分合圖：兩部分合起來等於總數，總數最多 10', () => {
