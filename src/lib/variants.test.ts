@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { g1u1 } from '../data/g1u1'
+import { g1u4 } from '../data/g1u4'
 import { g4u1 } from '../data/g4u1'
+import { g4u4 } from '../data/g4u4'
 import type { CompareQ, Question } from '../data/types'
 import { buildReviewTask } from './review'
 import { blocked, interleave, makeVariant } from './variants'
@@ -15,7 +17,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g1u1].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u4, g1u1, g1u4].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立 */
@@ -45,6 +47,19 @@ function checkVariant(original: Question, v: Question) {
       break
     case 'same':
       expect(v.answer).toBe(v.left.n === v.right.n)
+      break
+    case 'divide':
+      expect(v.divisor >= 2 && v.dividend >= v.divisor).toBe(true)
+      if (original.type === 'divide' && !original.units) {
+        expect(String(v.dividend).length).toBe(String(original.dividend).length)
+        expect(String(v.divisor).length).toBe(String(original.divisor).length)
+        expect(v.explain).toContain(`${Math.floor(v.dividend / v.divisor)} … ${v.dividend % v.divisor}`)
+      } else expect(v).toBe(original)
+      break
+    case 'bond':
+      expect(v.parts[0] + v.parts[1]).toBe(v.whole)
+      expect(v.whole <= 10 && v.parts.every((n) => n >= 1)).toBe(true)
+      expect(v.prompt).not.toMatch(/[□?<>]/)
       break
     case 'compare':
       expect(v.left).toMatch(/^[1-9][\d?]+$/)

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { g4u1 } from '../data/g4u1'
-import { bossUnlocked, recommend, taskStatuses } from './recommend'
+import { g4u4 } from '../data/g4u4'
+import { bossUnlocked, currentUnitOf, recommend, taskStatuses } from './recommend'
 import type { Attempt } from './store'
 
 const done = (taskId: string, firstTry: number, total = 8): Attempt => ({
@@ -26,6 +27,24 @@ describe('任務推薦', () => {
       { ...done(g4u1.boss.id, 0), mode: 'boss' },
     ]
     expect(taskStatuses([g4u1], attempts).every((s) => s.doneCount === 0)).toBe(true)
+  })
+})
+
+describe('目前單元優先', () => {
+  it('學校上到第 4 單元：先推第 4 單元沒做過的任務，不從第 1 單元開始', () => {
+    const picks = recommend(taskStatuses([g4u1, g4u4], []), 3, g4u4.id)
+    expect(picks.every((s) => s.unit.id === g4u4.id)).toBe(true)
+  })
+
+  it('目前單元都練過幾次以後，前面單元沒做過的任務會回來當複習', () => {
+    const attempts = g4u4.tasks.flatMap((t) => [done(t.id, 8), done(t.id, 8)])
+    const picks = recommend(taskStatuses([g4u1, g4u4], attempts), 3, g4u4.id)
+    expect(picks.some((s) => s.unit.id === g4u1.id)).toBe(true)
+  })
+
+  it('沒設定目前單元時用最新的單元', () => {
+    expect(currentUnitOf([g4u1, g4u4])?.id).toBe(g4u4.id)
+    expect(currentUnitOf([g4u1, g4u4], g4u1.id)?.id).toBe(g4u1.id)
   })
 })
 

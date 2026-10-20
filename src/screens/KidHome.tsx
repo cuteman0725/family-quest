@@ -1,7 +1,7 @@
 import { unitsForGrade } from '../data/units'
 import { costText, TASK_REWARD } from '../data/village'
 import { questionStates, skillMap } from '../lib/mastery'
-import { bossUnlocked, recommend, taskStatuses } from '../lib/recommend'
+import { bossUnlocked, currentUnitOf, recommend, taskStatuses } from '../lib/recommend'
 import { REVIEW_MAX } from '../lib/review'
 import { sfx } from '../lib/sfx'
 import { speak } from '../lib/speech'
@@ -21,7 +21,11 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
   const profile = save.profiles.find((p) => p.id === profileId)!
   const attempts = save.attempts[profileId] ?? []
   const units = unitsForGrade(profile.grade)
-  const picks = recommend(taskStatuses(units, attempts))
+  const current = currentUnitOf(units, profile.currentUnit)
+  const picks = recommend(taskStatuses(units, attempts), 3, current?.id)
+  // 魔王關：目前單元一定顯示；其他單元解鎖了才顯示
+  const bossUnits = units.filter((u) => u.id === current?.id || bossUnlocked(u, attempts))
+  const otherUnits = units.filter((u) => u.id !== current?.id)
   const isYoung = profile.grade === 1
   const due = dueCardIds(profileId, save)
   const reviewIds = due.slice(0, REVIEW_MAX)
@@ -88,6 +92,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
               }}
             >
               <span className="task-icon">{task.icon}</span>
+              {unit.id !== current?.id && <span className="task-review-tag">複習：單元{unit.number}</span>}
               <span className="task-title">{task.title}</span>
               <span className="task-blurb">{task.blurb}</span>
               <span className="task-meta">
@@ -102,7 +107,7 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
         ))}
       </div>
 
-      {units.map((unit) => {
+      {bossUnits.map((unit) => {
         const open = bossUnlocked(unit, attempts)
         const done = unit.tasks.filter((t) => attempts.some((a) => a.taskId === t.id)).length
         return (
@@ -119,9 +124,21 @@ export function KidHome({ profileId, onPlay, onReview, onVillage, onBack }: Prop
         )
       })}
 
-      {units.map((unit) => (
-        <SkillMap key={unit.id} title={`我的技能地圖：${unit.title}`} nodes={skillMap(unit, states)} autoRead={isYoung} />
-      ))}
+      {current && (
+        <SkillMap
+          title={`我的技能地圖：單元${current.number} ${current.title}`}
+          nodes={skillMap(current, states)}
+          autoRead={isYoung}
+        />
+      )}
+      {otherUnits.length > 0 && (
+        <details className="other-maps">
+          <summary>其他單元的技能地圖</summary>
+          {otherUnits.map((u) => (
+            <SkillMap key={u.id} title={`單元${u.number} ${u.title}`} nodes={skillMap(u, states)} autoRead={isYoung} />
+          ))}
+        </details>
+      )}
     </div>
   )
 }

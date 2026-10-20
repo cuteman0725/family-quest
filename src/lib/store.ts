@@ -9,6 +9,8 @@ export interface Profile {
   name: string
   grade: Grade
   avatar: string
+  /** 學校目前上到的單元（家長頁設定）；任務推薦先排這個單元。沒設定就用最新的單元 */
+  currentUnit?: string
 }
 
 export interface Attempt {
@@ -175,6 +177,13 @@ export function renameProfile(profileId: string, name: string) {
   commit({
     ...state,
     profiles: state.profiles.map((p) => (p.id === profileId ? { ...p, name } : p)),
+  })
+}
+
+export function setCurrentUnit(profileId: string, unitId: string) {
+  commit({
+    ...state,
+    profiles: state.profiles.map((p) => (p.id === profileId ? { ...p, currentUnit: unitId } : p)),
   })
 }
 

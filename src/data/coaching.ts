@@ -35,5 +35,9 @@ export function activityFor(q: Question): string {
       return '兩手各抓幾顆糖，請她一顆對一顆排排看，判斷是不是一樣多。'
     case 'board':
       return '在地上畫 1 到 10 的格子，丟骰子一起走，邊走邊唸數字。'
+    case 'divide':
+      return '拿一把硬幣或積木實際分分看，每份放一樣多，再數剩下幾個，對照直式的商和餘數。'
+    case 'bond':
+      return '拿幾顆豆子分成兩堆，請她說「7 可以分成 3 和 4」，再換一種分法。'
   }
 }

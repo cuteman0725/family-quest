@@ -81,6 +81,34 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
     }
     case 'compare':
       return compareVariant(q, rng)
+    case 'divide': {
+      // 應用題（有單位）保留原題情境；純計算題換成同樣位數的被除數和除數
+      if (q.units) return q
+      const digitsOf = (n: number) => String(n).length
+      const dLen = digitsOf(q.divisor)
+      const divisor = int(rng, Math.max(2, 10 ** (dLen - 1)), 10 ** dLen - 1)
+      const nLen = digitsOf(q.dividend)
+      const dividend = int(rng, Math.max(divisor, 10 ** (nLen - 1)), 10 ** nLen - 1)
+      const quotient = Math.floor(dividend / divisor)
+      const remainder = dividend % divisor
+      return {
+        ...q,
+        dividend,
+        divisor,
+        prompt: `用直式算算看：${dividend} ÷ ${divisor}`,
+        explain: `${dividend} ÷ ${divisor} ＝ ${quotient} … ${remainder}。驗算：${divisor} × ${quotient} ＋ ${remainder} ＝ ${dividend}。`,
+      }
+    }
+    case 'bond': {
+      const whole = int(rng, 3, 10)
+      const a = int(rng, 1, whole - 1)
+      const parts: [number, number] = [a, whole - a]
+      const prompt =
+        q.blank === 'whole'
+          ? `${parts[0]} 和 ${parts[1]} 合起來是多少？`
+          : `${whole} 可以分成 ${parts[q.blank === 0 ? 1 : 0]} 和多少？`
+      return { ...q, whole, parts, prompt, explain: `${parts[0]} 和 ${parts[1]} 合起來是 ${whole}。` }
+    }
     default:
       return q
   }

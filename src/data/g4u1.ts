@@ -237,6 +237,7 @@ const Q = {
 
 export const g4u1: Unit = {
   id: 'g4u1',
+  number: 1,
   grade: 4,
   subject: '數學',
   title: '一億以內的數',

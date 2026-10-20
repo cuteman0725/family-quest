@@ -146,5 +146,26 @@ describe.each(entries)('$where', ({ q, grade }) => {
         expect(Number.isInteger(q.size) && q.size >= 5 && q.size <= 20).toBe(true)
       })
       break
+
+    case 'divide':
+      it('除數至少 2、被除數不比除數小；說明裡寫的商和餘數跟算出來的一樣', () => {
+        expect(Number.isInteger(q.divisor) && q.divisor >= 2).toBe(true)
+        expect(Number.isInteger(q.dividend) && q.dividend >= q.divisor).toBe(true)
+        const quotient = Math.floor(q.dividend / q.divisor)
+        const remainder = q.dividend % q.divisor
+        expect(q.explain).toContain(`${quotient} … ${remainder}`)
+      })
+      break
+
+    case 'bond':
+      it('分合圖：兩部分合起來等於總數，總數最多 10', () => {
+        expect(q.parts[0] + q.parts[1]).toBe(q.whole)
+        expect(q.parts.every((n) => Number.isInteger(n) && n >= 0)).toBe(true)
+        expect(q.whole <= 10).toBe(true)
+        // 「6 和 4 合起來是 10」或「9 可以分成 1 和 8」都要寫出兩個部分
+        expect(q.explain).toContain(`${q.parts[0]} 和 ${q.parts[1]}`)
+        expect(q.explain).toContain(String(q.whole))
+      })
+      break
   }
 })

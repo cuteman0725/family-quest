@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { activityFor, PARENT_PRAISE } from '../data/coaching'
 import { unitsForGrade } from '../data/units'
 import { questionStates, skillMap } from '../lib/mastery'
-import { taskStatuses } from '../lib/recommend'
+import { currentUnitOf, taskStatuses } from '../lib/recommend'
 import { findQuestion } from '../lib/review'
-import { CARD_INTERVALS, cardsOf, dueCardIds, renameProfile, resetAll, useSave } from '../lib/store'
+import { CARD_INTERVALS, cardsOf, dueCardIds, renameProfile, resetAll, setCurrentUnit, useSave } from '../lib/store'
 import { SkillMap } from './SkillMap'
 
 /**
@@ -23,6 +23,7 @@ export function Parent({ onBack }: { onBack: () => void }) {
   const p = save.profiles.find((x) => x.id === pid) ?? save.profiles[0]
   const attempts = save.attempts[p.id] ?? []
   const units = unitsForGrade(p.grade)
+  const current = currentUnitOf(units, p.currentUnit)
   const cards = cardsOf(p.id, save)
   const states = questionStates(units, attempts, cards)
   const strong = [...states.values()].filter((s) => s === 'strong').length
@@ -102,6 +103,20 @@ export function Parent({ onBack }: { onBack: () => void }) {
             </>
           )}
         </h2>
+        <div className="unit-picker">
+          <span>學校目前上到：</span>
+          {units.map((u) => (
+            <button
+              key={u.id}
+              className={`small-btn ${u.id === current?.id ? 'active' : ''}`}
+              aria-pressed={u.id === current?.id}
+              onClick={() => setCurrentUnit(p.id, u.id)}
+            >
+              單元{u.number} {u.title}
+            </button>
+          ))}
+        </div>
+        <p className="note">任務推薦會先排這個單元，練熟之後再穿插前面單元的複習。</p>
         <div className="memory-stats">
           <div>
             <strong>{strong}</strong>

@@ -96,6 +96,26 @@ export interface BoardQ extends Base {
   size: number
 }
 
+/** 四年級：直式除法，在紙上算完後填「商」和「餘數」兩格；答案從被除數、除數算出來 */
+export interface DivideQ extends Base {
+  type: 'divide'
+  dividend: number
+  divisor: number
+  /** 應用題的答案單位，例如 ['段', '公尺'] 顯示成「（ ）段，剩下（ ）公尺」；沒有就顯示商與餘數 */
+  units?: [string, string]
+}
+
+/** 一年級：數字分合圖（上面是合起來的數，下面是兩個部分），其中一格空白要填 */
+export interface BondQ extends Base {
+  type: 'bond'
+  whole: number
+  parts: [number, number]
+  /** 哪一格空白：合起來的數，或第幾個部分 */
+  blank: 'whole' | 0 | 1
+  /** 有給就把兩堆畫出來，讓孩子數；沒給就只看數字 */
+  emoji?: string
+}
+
 export type Question =
   | TrueFalseQ
   | ChoiceQ
@@ -108,6 +128,8 @@ export type Question =
   | FillToQ
   | SameQ
   | BoardQ
+  | DivideQ
+  | BondQ
 
 /** 短任務：約 10～15 分鐘、一小組題目 */
 export interface Task {
@@ -125,6 +147,8 @@ export interface Task {
 export interface Unit {
   id: string
   grade: Grade
+  /** 課本的第幾單元，用來排順序和選「目前單元」 */
+  number: number
   subject: '數學'
   title: string
   source: string

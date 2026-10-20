@@ -104,6 +104,7 @@ const Q = {
 
 export const g1u1: Unit = {
   id: 'g1u1',
+  number: 1,
   grade: 1,
   subject: '數學',
   title: '10 以內的數',
