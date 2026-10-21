@@ -147,7 +147,9 @@ export function answerText(q: Question): string {
     case 'barBuild':
       return q.categories.map((c, i) => `${c} ${q.values[i]}`).join('、')
     case 'typo':
-      return `「${(q.words ?? [...q.sentence])[q.wrong]}」改成「${q.options[q.answer]}」`
+      return q.extra
+        ? `把多的「${[...q.sentence][q.wrong]}」刪掉`
+        : `「${(q.words ?? [...q.sentence])[q.wrong]}」改成「${q.options[q.answer]}」`
     case 'bins':
       return q.bins.map((b, bi) => `${b}：${q.items.filter((it) => it.bin === bi).map((it) => it.label).join('、')}`).join('\n')
   }

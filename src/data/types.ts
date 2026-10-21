@@ -307,6 +307,8 @@ export interface TypoQ extends Base {
   type: 'typo'
   sentence: string
   words?: string[]
+  /** 多了一個字：點到就刪掉，不用再選字（options 留空） */
+  extra?: boolean
   wrong: number
   options: string[]
   answer: number

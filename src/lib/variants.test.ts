@@ -6,6 +6,7 @@ import { g1c4 } from '../data/g1c4'
 import { g1c5 } from '../data/g1c5'
 import { g1c6 } from '../data/g1c6'
 import { g1c7 } from '../data/g1c7'
+import { g1c8 } from '../data/g1c8'
 import { g1u1 } from '../data/g1u1'
 import { g1u2 } from '../data/g1u2'
 import { g1u3 } from '../data/g1u3'
@@ -22,6 +23,7 @@ import { g4c4 } from '../data/g4c4'
 import { g4c5 } from '../data/g4c5'
 import { g4c6 } from '../data/g4c6'
 import { g4c7 } from '../data/g4c7'
+import { g4c8 } from '../data/g4c8'
 import { g4u1 } from '../data/g4u1'
 import { g4u2 } from '../data/g4u2'
 import { g4u3 } from '../data/g4u3'
@@ -49,7 +51,7 @@ function seeded(seed: number) {
 }
 
 const g1Task = (id: string) => g1u1.tasks.find((t) => t.id === id)!
-const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g4u10, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9, g4c1, g4c2, g4c3, g4c4, g4c5, g4c6, g4c7, g1c1, g1c2, g1c3, g1c4, g1c5, g1c6, g1c7].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
+const allQuestions = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g4u10, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9, g4c1, g4c2, g4c3, g4c4, g4c5, g4c6, g4c7, g4c8, g1c1, g1c2, g1c3, g1c4, g1c5, g1c6, g1c7, g1c8].flatMap((u) => [...u.tasks, u.boss]).flatMap((t) => t.questions)
 const uniq = [...new Map(allQuestions.map((q) => [q.id, q])).values()]
 
 /** 天秤：? 換成 0～9 的每一種可能，答案都要成立；長度先換成毫米 */

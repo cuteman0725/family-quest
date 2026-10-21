@@ -26,11 +26,18 @@ export function Typo({ q, onAnswer, locked }: GameProps<TypoQ>) {
     setTimeout(() => setShake(null), 400)
   }
 
+  // 多一個重複的字（「的的」）時，點哪一個都算對
+  const isWrong = (i: number) => i === q.wrong || (!!q.extra && chars[i] === chars[q.wrong] && Math.abs(i - q.wrong) === 1)
+
   const tapChar = (i: number) => {
     if (locked || found) return
-    if (i !== q.wrong) return miss(`c${i}`)
+    if (!isWrong(i)) return miss(`c${i}`)
     sfx.tap()
     setFound(true)
+    if (q.extra) {
+      setFixed(true)
+      setTimeout(() => onAnswer(mistakes === 0, { selfCorrected: true }), 600)
+    }
   }
 
   const pick = (i: number) => {
@@ -45,7 +52,8 @@ export function Typo({ q, onAnswer, locked }: GameProps<TypoQ>) {
     <div className="picture-game">
       <p className="typo-sentence">
         {chars.map((c, i) =>
-          PUNCT.test(c) ? (
+          // 刪掉的多餘字整個拿掉
+          fixed && q.extra && i === q.wrong ? null : PUNCT.test(c) ? (
             <span key={i} className="typo-punct">
               {c}
             </span>
@@ -61,8 +69,10 @@ export function Typo({ q, onAnswer, locked }: GameProps<TypoQ>) {
           ),
         )}
       </p>
-      {!found ? (
-        <p className="counter">{q.words ? '句子裡有一個語詞用得不對，把它點出來' : '句子裡有一個錯字，把它點出來'}</p>
+      {!found || q.extra ? (
+        <p className="counter">
+          {q.extra ? '句子裡多了一個字，把它點掉' : q.words ? '句子裡有一個語詞用得不對，把它點出來' : '句子裡有一個錯字，把它點出來'}
+        </p>
       ) : (
         <>
           <p className="counter">

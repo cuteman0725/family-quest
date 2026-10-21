@@ -411,6 +411,15 @@ describe.each(entries)('$where', ({ q, grade }) => {
         const chars = q.words ?? [...q.sentence]
         const wrong = chars[q.wrong]
         expect(wrong, '找不到錯字').toBeDefined()
+        if (q.extra) {
+          // 多一個字：刪掉以後的句子寫在說明裡；重複的字只能緊鄰（「的的」）
+          const fixed = chars.filter((_, i) => i !== q.wrong).join('')
+          expect(q.explain).toContain(fixed)
+          const same = chars.map((c, i) => (c === wrong ? i : -1)).filter((i) => i >= 0)
+          expect(same.every((i) => Math.abs(i - q.wrong) <= 1)).toBe(true)
+          expect(q.options).toEqual([])
+          return
+        }
         expect(chars.filter((c) => c === wrong)).toHaveLength(1)
         expect(new Set(q.options).size).toBe(q.options.length)
         expect(q.options).not.toContain(wrong)
