@@ -2409,3 +2409,8 @@ p {
 .typo-sentence .typo-char {
   white-space: nowrap;
 }
+
+.big-btn.char-opt {
+  font-size: 40px;
+  min-width: 96px;
+}

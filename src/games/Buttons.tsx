@@ -3,7 +3,7 @@ import { sfx } from '../lib/sfx'
 import type { GameProps } from './types'
 import { Pile } from './Picture'
 import { Rich } from './Rich'
-import { ZHUYIN_ONLY } from '../lib/zhuyin'
+import { SINGLE_CHAR, ZHUYIN_ONLY } from '../lib/zhuyin'
 
 export function TrueFalse({ q, onAnswer, locked }: GameProps<TrueFalseQ>) {
   return (
@@ -22,7 +22,7 @@ export function Choice({ q, onAnswer, locked }: GameProps<ChoiceQ>) {
   return (
     <div className="row-buttons wrap">
       {q.options.map((opt, i) => (
-        <button key={opt} className={`big-btn ${ZHUYIN_ONLY.test(opt) ? 'zhuyin-opt' : ''}`} disabled={locked} onClick={() => onAnswer(i === q.answer)}>
+        <button key={opt} className={`big-btn ${ZHUYIN_ONLY.test(opt) ? 'zhuyin-opt' : ''} ${SINGLE_CHAR.test(opt) ? 'char-opt' : ''}`} disabled={locked} onClick={() => onAnswer(i === q.answer)}>
           <Rich text={opt} />
         </button>
       ))}
