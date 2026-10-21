@@ -2370,13 +2370,13 @@ p {
   gap: 4px 2px;
   max-width: 680px;
   margin: 0;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
 }
 
 .typo-char {
-  min-width: 44px;
-  height: 52px;
+  min-width: 48px;
+  height: 58px;
   padding: 0 2px;
   border: 2px solid transparent;
   border-bottom: 2px dashed var(--line);
