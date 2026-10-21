@@ -8,6 +8,7 @@ import { g1c7 } from './g1c7'
 import { g1c8 } from './g1c8'
 import { g1c9 } from './g1c9'
 import { g1c10 } from './g1c10'
+import { g1c11 } from './g1c11'
 import { g1u1 } from './g1u1'
 import { g1u2 } from './g1u2'
 import { g1u3 } from './g1u3'
@@ -27,6 +28,8 @@ import { g4c7 } from './g4c7'
 import { g4c8 } from './g4c8'
 import { g4c9 } from './g4c9'
 import { g4c10 } from './g4c10'
+import { g4c11 } from './g4c11'
+import { g4c12 } from './g4c12'
 import { g4u1 } from './g4u1'
 import { g4u2 } from './g4u2'
 import { g4u3 } from './g4u3'
@@ -39,7 +42,7 @@ import { g4u9 } from './g4u9'
 import { g4u10 } from './g4u10'
 import type { Grade, Subject, Task, Unit } from './types'
 
-export const units: Unit[] = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g4u10, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9, g4c1, g4c2, g4c3, g4c4, g4c5, g4c6, g4c7, g4c8, g4c9, g4c10, g1c1, g1c2, g1c3, g1c4, g1c5, g1c6, g1c7, g1c8, g1c9, g1c10]
+export const units: Unit[] = [g4u1, g4u2, g4u3, g4u4, g4u5, g4u6, g4u7, g4u8, g4u9, g4u10, g1u1, g1u2, g1u3, g1u4, g1u5, g1u6, g1u7, g1u8, g1u9, g4c1, g4c2, g4c3, g4c4, g4c5, g4c6, g4c7, g4c8, g4c9, g4c10, g4c11, g4c12, g1c1, g1c2, g1c3, g1c4, g1c5, g1c6, g1c7, g1c8, g1c9, g1c10, g1c11]
 
 /**
  * 家長頁還沒設定「學校目前上到」時用的單元（2026/10/20 的學校進度）。
