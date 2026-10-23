@@ -2,6 +2,7 @@ import type { Question } from '../data/types'
 import { Board } from './Board'
 import { Bond } from './Bond'
 import { Divide } from './Divide'
+import { DivideWrite } from './DivideWrite'
 import { Angle } from './Angle'
 import { Length } from './Length'
 import { Order } from './Order'
@@ -47,7 +48,7 @@ export function GameView({ q, ...rest }: GameProps<Question>) {
     case 'board':
       return <Board q={q} {...rest} />
     case 'divide':
-      return <Divide q={q} {...rest} />
+      return q.write ? <DivideWrite q={q} {...rest} /> : <Divide q={q} {...rest} />
     case 'bond':
       return <Bond q={q} {...rest} />
     case 'pair':

@@ -16,7 +16,22 @@ const drill = (id: string, dividend: number, divisor: number): DivideQ => {
   }
 }
 
+/** 跟著寫：在 App 裡一格一格填直式，學會「怎麼寫」（會心算但不會寫直式時用） */
+const write = (id: string, dividend: number, divisor: number): DivideQ => ({
+  ...drill(id, dividend, divisor),
+  prompt: `跟著寫直式：${dividend} ÷ ${divisor}`,
+  hint: '照課本的順序一格一格寫：估商 → 乘回去 → 相減 → 把下一位移下來，再估下一位的商。',
+  write: true,
+})
+
 const Q = {
+  // 跟著寫直式：從簡單到難（一位數除數 → 商中間有 0 → 二位數除數）
+  w84: write('g4u4-v-lw1', 84, 4),
+  w735: write('g4u4-v-lw2', 735, 6),
+  w1627: write('g4u4-v-lw3', 1627, 4),
+  w975: write('g4u4-v-lw4', 975, 31),
+  w3024: write('g4u4-v-lw5', 3024, 24),
+
   // 估商與商的位數
   digits2: {
     id: 'g4u4-paper-c1', type: 'choice', prompt: '下面哪一個算式的商是二位數？',
@@ -182,6 +197,10 @@ export const g4u4: Unit = {
     {
       id: 'g4u4-t1', skill: '估商與商的位數', title: '商有幾位', icon: '🔭', blurb: '還沒算，先猜猜商有幾位數。',
       questions: [Q.digits2, Q.box3, Q.c785, Q.c3456, Q.c432],
+    },
+    {
+      id: 'g4u4-t2w', skill: '直式的寫法', title: '跟著寫直式', icon: '📝', blurb: '一格一格寫，學會直式怎麼寫。',
+      questions: [Q.w84, Q.w735, Q.w1627, Q.w975, Q.w3024],
     },
     {
       id: 'g4u4-t2', skill: '直式除法', title: '直式除法', icon: '✏️', blurb: '在紙上算，再填商和餘數。',

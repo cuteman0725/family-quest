@@ -164,7 +164,7 @@ export function makeVariant(q: Question, rng: Rng = Math.random): Question {
         ...q,
         dividend,
         divisor,
-        prompt: `用直式算算看：${dividend} ÷ ${divisor}`,
+        prompt: `${q.write ? '跟著寫直式' : '用直式算算看'}：${dividend} ÷ ${divisor}`,
         explain: `${dividend} ÷ ${divisor} ＝ ${quotient} … ${remainder}。驗算：${divisor} × ${quotient} ＋ ${remainder} ＝ ${dividend}。`,
       }
     }

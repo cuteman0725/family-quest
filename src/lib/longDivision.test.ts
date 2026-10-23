@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { units } from '../data/units'
-import { longDivisionSteps, quotientShape, similarDivision } from './longDivision'
+import { fillHint, longDivisionSteps, quotientShape, similarDivision } from './longDivision'
 
 const last = <T,>(xs: T[]) => xs[xs.length - 1]
 const rowsText = (dividend: number, divisor: number) =>
@@ -78,5 +78,36 @@ describe('直式除法步驟', () => {
       const steps = longDivisionSteps(q.dividend, q.divisor)
       expect(Number(last(steps).board.quotient.join(''))).toBe(Math.floor(q.dividend / q.divisor))
     }
+  })
+
+  it('跟著寫：除了開頭和最後的總結，每一步都剛好有一格要填，填的答案就是那一步寫上去的', () => {
+    for (let t = 0; t < 1000; t++) {
+      const divisor = 2 + Math.floor(Math.random() * 98)
+      const dividend = divisor + Math.floor(Math.random() * 9999)
+      const steps = longDivisionSteps(dividend, divisor)
+      expect(steps[0].fill).toBeUndefined()
+      expect(last(steps).fill).toBeUndefined()
+      for (let k = 1; k < steps.length - 1; k++) {
+        const f = steps[k].fill!
+        const { board, mark } = steps[k]
+        if (f.kind === 'quotient') expect(board.quotient[mark.q!]).toBe(f.answer)
+        else if (f.kind === 'bringDown') {
+          const r = board.rows[mark.row!]
+          expect(r.text.endsWith(f.answer)).toBe(true)
+          expect(String(dividend)[r.endCol]).toBe(f.answer)
+        } else expect(board.rows[mark.row!].text).toBe(f.answer)
+        expect(f.ask).not.toContain(` ${f.answer}。`)
+      }
+    }
+  })
+
+  it('估商填錯時，提示會說太大或太小', () => {
+    const steps = longDivisionSteps(816, 23)
+    const f = steps.find((s) => s.fill?.kind === 'quotient')!.fill!
+    expect(f.answer).toBe('3')
+    expect(fillHint(f, '4')).toContain('太多了')
+    expect(fillHint(f, '2')).toContain('再大一點')
+    const zero = longDivisionSteps(1507, 5).find((s) => s.fill?.kind === 'quotient' && s.fill.answer === '0')!.fill!
+    expect(fillHint(zero, '1')).toContain('商要寫 0')
   })
 })

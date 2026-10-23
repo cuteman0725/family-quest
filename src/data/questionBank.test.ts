@@ -462,3 +462,14 @@ describe.each(entries)('$where', ({ q, grade }) => {
       break
   }
 })
+
+describe('跟著寫直式', () => {
+  it('跟著寫的題目會當格給提示，不能放進魔王關（交卷前不給回饋）；也不是應用題', () => {
+    for (const u of units) {
+      for (const q of u.boss.questions) expect(q.type === 'divide' && q.write, `${u.id}/${q.id}`).toBeFalsy()
+      for (const q of u.tasks.flatMap((t) => t.questions)) {
+        if (q.type === 'divide' && q.write) expect(q.units, q.id).toBeUndefined()
+      }
+    }
+  })
+})

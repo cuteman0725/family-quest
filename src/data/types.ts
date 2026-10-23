@@ -141,6 +141,8 @@ export interface DivideQ extends Base {
   divisor: number
   /** 應用題的答案單位，例如 ['段', '公尺'] 顯示成「（ ）段，剩下（ ）公尺」；沒有就顯示商與餘數 */
   units?: [string, string]
+  /** 跟著寫：在 App 裡照課本順序一格一格填直式（填錯當格提示），不是在紙上算完只填答案；不放進魔王關 */
+  write?: boolean
 }
 
 /** 一年級：數字分合圖（上面是合起來的數，下面是兩個部分），其中一格空白要填 */

@@ -19,11 +19,25 @@ export interface LDBoard {
   rows: LDRow[]
 }
 
+/** 跟著寫的時候，這一步要孩子自己填的那一格 */
+export interface LDFill {
+  kind: 'quotient' | 'product' | 'subtract' | 'bringDown'
+  answer: string
+  /** 填之前看到的一句話：只說這一步在做什麼，不說答案 */
+  ask: string
+  /** 這一步正在處理的數（被分的、被減的） */
+  cur: number
+  divisor: number
+  qd?: number
+  product?: number
+}
+
 export interface LDStep {
   say: string
   board: LDBoard
   /** 這一步要特別標出來的：商的第幾位、第幾列、被除數的第幾位到第幾位 */
   mark: { q?: number; row?: number; dividend?: [number, number] }
+  fill?: LDFill
 }
 
 export function longDivisionSteps(dividend: number, divisor: number): LDStep[] {
@@ -32,8 +46,13 @@ export function longDivisionSteps(dividend: number, divisor: number): LDStep[] {
   const quotient: string[] = Array(n).fill('')
   const rows: LDRow[] = []
   const steps: LDStep[] = []
-  const snap = (say: string, mark: LDStep['mark']) =>
-    steps.push({ say, board: { quotient: [...quotient], rows: rows.map((r) => ({ ...r })) }, mark })
+  const snap = (say: string, mark: LDStep['mark'], fill?: Omit<LDFill, 'divisor'>) =>
+    steps.push({
+      say,
+      board: { quotient: [...quotient], rows: rows.map((r) => ({ ...r })) },
+      mark,
+      ...(fill && { fill: { ...fill, divisor } }),
+    })
 
   // 從最左邊開始，找到第一段夠分的
   let i = 0
@@ -54,7 +73,9 @@ export function longDivisionSteps(dividend: number, divisor: number): LDStep[] {
     const qd = Math.floor(cur / divisor)
     quotient[i] = String(qd)
     if (qd === 0) {
-      snap(`${cur} 比 ${divisor} 小，不夠分，商寫 0（這個 0 不能省略）。`, { q: i, row: restRow })
+      snap(`${cur} 比 ${divisor} 小，不夠分，商寫 0（這個 0 不能省略）。`, { q: i, row: restRow }, {
+        kind: 'quotient', answer: '0', ask: `估商：${cur} 裡面有幾個 ${divisor}？`, cur, qd,
+      })
     } else {
       const p = divisor * qd
       const look = restRow === -1 ? { dividend: [i - String(cur).length + 1, i] as [number, number] } : { row: restRow }
@@ -63,20 +84,27 @@ export function longDivisionSteps(dividend: number, divisor: number): LDStep[] {
           ? `${cur} 裡面有幾個 ${divisor}？試試看：${divisor} × ${qd} ＝ ${p}，${divisor} × ${qd + 1} ＝ ${p + divisor} 太大了，所以商是 ${qd}，寫在 ${d[i]} 的上面。`
           : `${cur} 裡面有幾個 ${divisor}？${divisor} × 9 ＝ ${p}，商最大就是 9，寫在 ${d[i]} 的上面。`,
         { q: i, ...look },
+        { kind: 'quotient', answer: String(qd), ask: `估商：${cur} 裡面有幾個 ${divisor}？`, cur, qd },
       )
       rows.push({ kind: 'product', text: String(p), endCol: i, lineFrom: i - String(cur).length + 1 })
-      snap(`${divisor} × ${qd} ＝ ${p}，寫在 ${cur} 的下面，最右邊對齊，再畫一條線。`, { row: rows.length - 1 })
+      snap(`${divisor} × ${qd} ＝ ${p}，寫在 ${cur} 的下面，最右邊對齊，再畫一條線。`, { row: rows.length - 1 }, {
+        kind: 'product', answer: String(p), ask: `乘回去：${divisor} × ${qd} ＝ ？寫在 ${cur} 的下面。`, cur, qd, product: p,
+      })
       const rem = cur - p
       rows.push({ kind: 'rest', text: String(rem), endCol: i })
       restRow = rows.length - 1
-      snap(`${cur} − ${p} ＝ ${rem}。${rem} 比 ${divisor} 小，表示商 ${qd} 是對的。`, { row: restRow })
+      snap(`${cur} − ${p} ＝ ${rem}。${rem} 比 ${divisor} 小，表示商 ${qd} 是對的。`, { row: restRow }, {
+        kind: 'subtract', answer: String(rem), ask: `相減：${cur} − ${p} ＝ ？`, cur, qd, product: p,
+      })
       cur = rem
     }
     if (i === n - 1) break
     i++
     cur = cur * 10 + d[i]
     rows[restRow] = { kind: 'rest', text: String(cur), endCol: i }
-    snap(`把下一位 ${d[i]} 移下來，變成 ${cur}。`, { row: restRow, dividend: [i, i] })
+    snap(`把下一位 ${d[i]} 移下來，變成 ${cur}。`, { row: restRow, dividend: [i, i] }, {
+      kind: 'bringDown', answer: String(d[i]), ask: '移下來：被除數的下一位（藍色那一個）是多少？', cur,
+    })
   }
 
   const q = Math.floor(dividend / divisor)
@@ -113,4 +141,22 @@ export function similarDivision(dividend: number, divisor: number, rng: Rng = Ma
     if (!fallback && String(Math.floor(a / b)).length === shape.length) fallback = { dividend: a, divisor: b }
   }
   return fallback ?? { dividend, divisor }
+}
+
+/** 跟著寫填錯時的提示：告訴他錯在哪裡、往哪個方向改，不直接說答案 */
+export function fillHint(f: LDFill, input: string): string {
+  const v = Number(input)
+  const { cur, divisor } = f
+  switch (f.kind) {
+    case 'quotient':
+      if (f.qd === 0) return `${cur} 比 ${divisor} 小，不夠分，商要寫 0。`
+      if (v * divisor > cur) return `${divisor} × ${v} ＝ ${v * divisor}，比 ${cur} 大，太多了，商要再小一點。`
+      return `${divisor} × ${v} ＝ ${v * divisor}，${cur} − ${v * divisor} ＝ ${cur - v * divisor}，剩下的還比 ${divisor} 大，商可以再大一點。`
+    case 'product':
+      return `再算一次 ${divisor} × ${f.qd}（可以在紙上算）。`
+    case 'subtract':
+      return `再算一次 ${cur} − ${f.product}，要從個位開始減，不夠減要借位。`
+    case 'bringDown':
+      return '看被除數藍色的那一位，照著寫下來就好。'
+  }
 }
