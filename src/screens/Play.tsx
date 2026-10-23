@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { Grade, Question, Task } from '../data/types'
+import { useEffect, useMemo, useState } from 'react'
+import type { DivideQ, Grade, Question, Task } from '../data/types'
 import { GameView } from '../games/GameView'
 import { answerText } from '../lib/answer'
 import { sfx } from '../lib/sfx'
@@ -7,6 +7,8 @@ import { speak, stopSpeaking } from '../lib/speech'
 import { Rich } from '../games/Rich'
 import { isZhuyinLine } from '../lib/zhuyin'
 import { Chart } from '../games/Chart'
+import { LongDivision } from '../games/LongDivision'
+import { similarDivision } from '../lib/longDivision'
 
 export interface PlayResult {
   total: number
@@ -287,9 +289,10 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       )}
 
       {feedback.kind === 'hint' && (
-        <div className="sheet">
+        <div className={`sheet ${q.type === 'divide' ? 'tall' : ''}`}>
           <p className="sheet-title">😮 差一點點！</p>
           <p>💡 <Rich text={q.hint} /></p>
+          {q.type === 'divide' && <DivisionExample q={q} />}
           <button className="big-btn primary" onClick={retry}>
             再試一次
           </button>
@@ -297,10 +300,14 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       )}
 
       {feedback.kind === 'reveal' && (
-        <div className="sheet">
+        <div className={`sheet ${q.type === 'divide' ? 'tall' : ''}`}>
           <p className="sheet-title">一起來看答案</p>
           <pre className="answer"><Rich text={answerText(q)} /></pre>
-          {q.explain && <p><Rich text={q.explain} /></p>}
+          {q.type === 'divide' ? (
+            <LongDivision dividend={q.dividend} divisor={q.divisor} title="📝 直式一步一步算" />
+          ) : (
+            q.explain && <p><Rich text={q.explain} /></p>
+          )}
           <button className="big-btn primary" onClick={() => next(wrong)}>
             知道了 👍
           </button>
@@ -323,4 +330,10 @@ function Runner({ title, questions, style, grade, onExit, onDone }: RunnerProps)
       )}
     </div>
   )
+}
+
+/** 提示時先看一題「算法一樣」的範例怎麼寫直式，再回去自己算（不直接把原題算給他看） */
+function DivisionExample({ q }: { q: DivideQ }) {
+  const ex = useMemo(() => similarDivision(q.dividend, q.divisor), [q.dividend, q.divisor])
+  return <LongDivision dividend={ex.dividend} divisor={ex.divisor} title={`📝 先看一題算法一樣的：${ex.dividend} ÷ ${ex.divisor}`} />
 }
